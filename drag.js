@@ -1,211 +1,159 @@
-// Floating draggable image collage — pointer-based, with inertia and GPU-accelerated transforms
+// Infinite pannable image canvas — drag anywhere to pan; images tile seamlessly forever
 (function () {
-  const board = document.getElementById("dragBoard");
-  if (!board) return;
+  const canvas = document.getElementById("infiniteCanvas");
+  const world = document.getElementById("canvasWorld");
+  if (!canvas || !world) return;
 
-  const cards = Array.from(board.querySelectorAll(".drag-card"));
-  let topZ = 10;
+  // One repeating "tile" of images. It's rendered in a grid of copies so
+  // panning in any direction always reveals more of the same pattern,
+  // creating the illusion of an infinite canvas.
+  const TILE_W = 900;
+  const TILE_H = 700;
 
-  // Each card gets its own state: position, velocity, rotation, and a momentum loop flag
-  const state = new Map();
+  const PATTERN = [
+    { seed: "devanshi01", x: 20, y: 20, w: 260, h: 320 },
+    { seed: "devanshi02", x: 300, y: 30, w: 280, h: 200 },
+    { seed: "devanshi03", x: 600, y: 20, w: 260, h: 260 },
+    { seed: "devanshi04", x: 40, y: 360, w: 260, h: 300 },
+    { seed: "devanshi05", x: 320, y: 250, w: 260, h: 320 },
+    { seed: "devanshi06", x: 600, y: 300, w: 260, h: 360 },
+  ];
 
-  function boardSize() {
-    const rect = board.getBoundingClientRect();
-    return { w: rect.width, h: rect.height };
-  }
+  function buildGrid() {
+    world.innerHTML = "";
+    const rect = canvas.getBoundingClientRect();
+    const cols = Math.ceil(rect.width / TILE_W) + 2;
+    const rows = Math.ceil(rect.height / TILE_H) + 2;
 
-  function randomBetween(min, max) {
-    return min + Math.random() * (max - min);
-  }
+    for (let cx = -1; cx < cols; cx++) {
+      for (let cy = -1; cy < rows; cy++) {
+        PATTERN.forEach((item) => {
+          const tile = document.createElement("div");
+          tile.className = "canvas-tile";
+          tile.style.left = cx * TILE_W + item.x + "px";
+          tile.style.top = cy * TILE_H + item.y + "px";
+          tile.style.width = item.w + "px";
+          tile.style.height = item.h + "px";
 
-  function placeRandomly(card) {
-    const { w, h } = boardSize();
-    const cardW = card.offsetWidth;
-    const cardH = card.offsetHeight;
+          const img = document.createElement("img");
+          img.src =
+            "https://picsum.photos/seed/" +
+            item.seed +
+            "/" +
+            item.w * 2 +
+            "/" +
+            item.h * 2;
+          img.alt = "Work placeholder";
+          img.draggable = false;
 
-    const maxX = Math.max(0, w - cardW);
-    const maxY = Math.max(0, h - cardH);
-
-    const x = randomBetween(0, maxX);
-    const y = randomBetween(0, maxY);
-    const rotation = randomBetween(-9, 9);
-
-    state.set(card, {
-      x,
-      y,
-      vx: 0,
-      vy: 0,
-      rotation,
-      dragging: false,
-      momentum: false,
-    });
-
-    applyTransform(card);
-  }
-
-  function applyTransform(card) {
-    const s = state.get(card);
-    card.style.transform =
-      "translate3d(" + s.x + "px, " + s.y + "px, 0) rotate(" + s.rotation + "deg)";
-  }
-
-  function clampToBoard(card, s) {
-    const { w, h } = boardSize();
-    const cardW = card.offsetWidth;
-    const cardH = card.offsetHeight;
-    const maxX = Math.max(0, w - cardW);
-    const maxY = Math.max(0, h - cardH);
-
-    if (s.x < 0) {
-      s.x = 0;
-      s.vx = 0;
-    } else if (s.x > maxX) {
-      s.x = maxX;
-      s.vx = 0;
-    }
-
-    if (s.y < 0) {
-      s.y = 0;
-      s.vy = 0;
-    } else if (s.y > maxY) {
-      s.y = maxY;
-      s.vy = 0;
+          tile.appendChild(img);
+          world.appendChild(tile);
+        });
+      }
     }
   }
 
-  // Initial random placement once layout is ready
-  window.requestAnimationFrame(() => {
-    cards.forEach(placeRandomly);
-  });
+  buildGrid();
 
-  // Re-scatter on resize so cards stay within the new viewport bounds
   let resizeTimer;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      cards.forEach((card) => {
-        const s = state.get(card);
-        if (!s) return;
-        clampToBoard(card, s);
-        applyTransform(card);
-      });
-    }, 150);
+    resizeTimer = setTimeout(buildGrid, 150);
   });
+
+  // --- Panning with inertia ---
+  let offsetX = 0;
+  let offsetY = 0;
+
+  function wrap(value, size) {
+    return ((value % size) + size) % size;
+  }
+
+  function applyTransform() {
+    world.style.transform = "translate3d(" + offsetX + "px, " + offsetY + "px, 0)";
+  }
+
+  let dragging = false;
+  let dragStartPointerX = 0;
+  let dragStartPointerY = 0;
+  let dragStartOffsetX = 0;
+  let dragStartOffsetY = 0;
+  let lastX = 0;
+  let lastY = 0;
+  let lastTime = 0;
+  let velX = 0;
+  let velY = 0;
 
   const FRICTION = 0.94;
   const STOP_THRESHOLD = 0.03;
-  const activeMomentum = new Set();
 
   function momentumTick() {
-    activeMomentum.forEach((card) => {
-      const s = state.get(card);
-      s.x += s.vx;
-      s.y += s.vy;
-      s.vx *= FRICTION;
-      s.vy *= FRICTION;
+    offsetX = wrap(offsetX + velX, TILE_W);
+    offsetY = wrap(offsetY + velY, TILE_H);
+    velX *= FRICTION;
+    velY *= FRICTION;
+    applyTransform();
 
-      clampToBoard(card, s);
-      applyTransform(card);
-
-      if (Math.abs(s.vx) < STOP_THRESHOLD && Math.abs(s.vy) < STOP_THRESHOLD) {
-        s.vx = 0;
-        s.vy = 0;
-        activeMomentum.delete(card);
-      }
-    });
-
-    if (activeMomentum.size > 0) {
+    if (Math.abs(velX) > STOP_THRESHOLD || Math.abs(velY) > STOP_THRESHOLD) {
       requestAnimationFrame(momentumTick);
     }
   }
 
-  cards.forEach((card) => {
-    let pointerStartX = 0;
-    let pointerStartY = 0;
-    let startX = 0;
-    let startY = 0;
-    let lastX = 0;
-    let lastY = 0;
-    let lastTime = 0;
-    let velX = 0;
-    let velY = 0;
+  canvas.addEventListener("pointerdown", (e) => {
+    dragging = true;
+    velX = 0;
+    velY = 0;
 
-    card.addEventListener("pointerdown", (e) => {
-      const s = state.get(card);
-      if (!s) return;
+    canvas.classList.add("dragging");
+    document.body.classList.add("is-dragging");
+    canvas.setPointerCapture(e.pointerId);
 
-      activeMomentum.delete(card);
-      s.vx = 0;
-      s.vy = 0;
+    dragStartPointerX = e.clientX;
+    dragStartPointerY = e.clientY;
+    dragStartOffsetX = offsetX;
+    dragStartOffsetY = offsetY;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    lastTime = performance.now();
+  });
 
-      card.setPointerCapture(e.pointerId);
-      card.classList.add("dragging");
-      document.body.classList.add("is-dragging");
+  canvas.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
 
-      topZ += 1;
-      card.style.zIndex = topZ;
+    const dx = e.clientX - dragStartPointerX;
+    const dy = e.clientY - dragStartPointerY;
 
-      pointerStartX = e.clientX;
-      pointerStartY = e.clientY;
-      startX = s.x;
-      startY = s.y;
-      lastX = e.clientX;
-      lastY = e.clientY;
-      lastTime = performance.now();
-      velX = 0;
-      velY = 0;
+    offsetX = wrap(dragStartOffsetX + dx, TILE_W);
+    offsetY = wrap(dragStartOffsetY + dy, TILE_H);
+    applyTransform();
 
-      s.dragging = true;
-    });
+    const now = performance.now();
+    const dt = Math.max(now - lastTime, 1);
+    velX = ((e.clientX - lastX) / dt) * 16;
+    velY = ((e.clientY - lastY) / dt) * 16;
 
-    card.addEventListener("pointermove", (e) => {
-      const s = state.get(card);
-      if (!s || !s.dragging) return;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    lastTime = now;
+  });
 
-      const dx = e.clientX - pointerStartX;
-      const dy = e.clientY - pointerStartY;
+  function endDrag(e) {
+    if (!dragging) return;
+    dragging = false;
+    canvas.classList.remove("dragging");
+    document.body.classList.remove("is-dragging");
 
-      s.x = startX + dx;
-      s.y = startY + dy;
-
-      clampToBoard(card, s);
-      applyTransform(card);
-
-      const now = performance.now();
-      const dt = Math.max(now - lastTime, 1);
-      velX = ((e.clientX - lastX) / dt) * 16; // approximate px per frame at 60fps
-      velY = ((e.clientY - lastY) / dt) * 16;
-
-      lastX = e.clientX;
-      lastY = e.clientY;
-      lastTime = now;
-    });
-
-    function endDrag(e) {
-      const s = state.get(card);
-      if (!s || !s.dragging) return;
-
-      s.dragging = false;
-      card.classList.remove("dragging");
-      document.body.classList.remove("is-dragging");
-
-      try {
-        card.releasePointerCapture(e.pointerId);
-      } catch (err) {
-        /* no-op */
-      }
-
-      // hand off to inertia
-      s.vx = velX;
-      s.vy = velY;
-
-      if (Math.abs(s.vx) > STOP_THRESHOLD || Math.abs(s.vy) > STOP_THRESHOLD) {
-        activeMomentum.add(card);
-        requestAnimationFrame(momentumTick);
-      }
+    try {
+      canvas.releasePointerCapture(e.pointerId);
+    } catch (err) {
+      /* no-op */
     }
 
-    card.addEventListener("pointerup", endDrag);
-    card.addEventListener("pointercancel", endDrag);
-  });
+    if (Math.abs(velX) > STOP_THRESHOLD || Math.abs(velY) > STOP_THRESHOLD) {
+      requestAnimationFrame(momentumTick);
+    }
+  }
+
+  canvas.addEventListener("pointerup", endDrag);
+  canvas.addEventListener("pointercancel", endDrag);
 })();
