@@ -3,16 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Work — Devanshi Meena</title>
-<meta name="description" content="illustration and design work by Devanshi Meena.">
+<title>Work - Devanshi Meena</title>
+<meta name="description" content="Branding, illustration, mixed media, and design work by Devanshi Meena — drag it around.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <div class="ticker" aria-hidden="true">
   <div class="ticker__track">
-    <span class="ticker__item">live love larp&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;niche.&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;performative.&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;STILL LOADING? GOOD.&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;</span>
-    <span class="ticker__item" aria-hidden="true">live love larp&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;niche.&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;performative.&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;STILL LOADING? GOOD.&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;</span>
+    <span class="ticker__item">PAINTER&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;ILLUSTRATOR&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;FREELANCE CREATIVE&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;FUTURE PILOT&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;</span>
+    <span class="ticker__item" aria-hidden="true">PAINTER&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;ILLUSTRATOR&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;FREELANCE CREATIVE&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;FUTURE PILOT&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;</span>
   </div>
 </div>
 
@@ -45,31 +47,72 @@
 </section>
 
 <section class="strip">
-  <p>PROJECTS COMING SOON : THIS PAGE IS GROWING.</p>
+  <p>EVERYTHING BELOW IS DRAGGABLE — MOVE IT AROUND.</p>
 </section>
 
-<!-- WORK GRID -->
-<section class="work" id="work">
-  <span class="eyebrow">WHAT I DO</span>
-  <div class="work__grid">
-    <a href="contact.html" class="work__item">
-      <span class="work__num">01</span>
-      <span class="work__name">ILLUSTRATION</span>
-      <span class="work__meta">digital & hand-drawn</span>
-    </a>
-    <a href="contact.html" class="work__item">
-      <span class="work__num">02</span>
-      <span class="work__name">MIXED MEDIA</span>
-      <span class="work__meta">painting / posters</span>
-    </a>
-    <a href="contact.html" class="work__item">
-      <span class="work__num">03/span>
-      <span class="work__name">GRAPHICS</span>
-      <span class="work__meta">layouts / reels</span>
-    </a>
+<!-- DRAG BOARD -->
+<section class="drag-board" id="dragBoard">
+  <p class="drag-board__hint">(drag the cards around)</p>
+
+  <div class="drag-card" style="top:8%; left:5%; transform:rotate(-6deg);">
+    <span class="drag-card__tag">01 / branding</span>
+    <span class="drag-card__title">CHAI CO.<br>IDENTITY</span>
+  </div>
+
+  <div class="drag-card drag-card--dark" style="top:14%; left:38%; transform:rotate(4deg);">
+    <span class="drag-card__tag">02 / illustration</span>
+    <span class="drag-card__title">POSTER<br>SERIES</span>
+  </div>
+
+  <div class="drag-card" style="top:6%; left:68%; transform:rotate(-3deg);">
+    <span class="drag-card__tag">03 / mixed media</span>
+    <span class="drag-card__title">STUDIO<br>COLLAGE</span>
+  </div>
+
+  <div class="drag-card drag-card--dark" style="top:32%; left:12%; transform:rotate(7deg);">
+    <span class="drag-card__tag">04 / graphic design</span>
+    <span class="drag-card__title">ZINE<br>LAYOUT</span>
+  </div>
+
+  <div class="drag-card" style="top:38%; left:46%; transform:rotate(-8deg);">
+    <span class="drag-card__tag">05 / branding</span>
+    <span class="drag-card__title">STUDIO<br>LOGO MARK</span>
+  </div>
+
+  <div class="drag-card drag-card--dark" style="top:34%; left:74%; transform:rotate(5deg);">
+    <span class="drag-card__tag">06 / illustration</span>
+    <span class="drag-card__title">CHARACTER<br>SKETCHES</span>
+  </div>
+
+  <div class="drag-card" style="top:58%; left:8%; transform:rotate(3deg);">
+    <span class="drag-card__tag">07 / mixed media</span>
+    <span class="drag-card__title">CANVAS<br>SERIES NO. 3</span>
+  </div>
+
+  <div class="drag-card drag-card--dark" style="top:62%; left:40%; transform:rotate(-5deg);">
+    <span class="drag-card__tag">08 / graphic design</span>
+    <span class="drag-card__title">EVENT<br>FLYER</span>
+  </div>
+
+  <div class="drag-card" style="top:56%; left:70%; transform:rotate(8deg);">
+    <span class="drag-card__tag">09 / branding</span>
+    <span class="drag-card__title">PACKAGING<br>CONCEPT</span>
+  </div>
+
+  <div class="drag-card drag-card--dark" style="top:80%; left:24%; transform:rotate(-4deg);">
+    <span class="drag-card__tag">10 / mixed media</span>
+    <span class="drag-card__title">PAINTED<br>STUDY</span>
+  </div>
+
+  <div class="drag-card" style="top:82%; left:58%; transform:rotate(6deg);">
+    <span class="drag-card__tag">11 / illustration</span>
+    <span class="drag-card__title">DIGITAL<br>PORTRAIT</span>
   </div>
 </section>
 
+<section class="fullbleed">
+  <p>PAINT.<br>DESIGN.<br>FLY.</p>
+</section>
 
 <footer class="site-footer">
   <span>© 2026 DIVA.</span>
@@ -78,5 +121,6 @@
 </footer>
 
 <script src="script.js"></script>
+<script src="drag.js"></script>
 </body>
 </html>
