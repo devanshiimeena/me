@@ -601,6 +601,85 @@ a {
 }
 
 /* ==========================================================
+   DRAG BOARD (WORK PAGE — SCATTERED DRAGGABLE CARDS)
+   ========================================================== */
+.drag-board {
+  position: relative;
+  min-height: 140vh;
+  overflow: hidden;
+  border-bottom: 3px solid var(--black);
+  background: var(--pink);
+}
+
+.drag-board__hint {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  z-index: 999;
+  pointer-events: none;
+}
+
+.drag-card {
+  position: absolute;
+  width: clamp(160px, 22vw, 240px);
+  padding: 20px 18px;
+  border: 3px solid var(--black);
+  box-shadow: 8px 8px 0 var(--black);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transition: box-shadow 0.12s ease;
+  background: #fff;
+  color: var(--black);
+}
+
+.drag-card--dark {
+  background: var(--black);
+  color: var(--pink);
+  box-shadow: 8px 8px 0 rgba(10, 10, 10, 0.4);
+}
+
+.drag-card.dragging {
+  cursor: grabbing;
+  box-shadow: 12px 12px 0 var(--black);
+}
+
+.drag-card--dark.dragging {
+  box-shadow: 12px 12px 0 rgba(10, 10, 10, 0.4);
+}
+
+.drag-card__tag {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.drag-card__title {
+  display: block;
+  font-size: clamp(18px, 2.4vw, 26px);
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+@media (max-width: 720px) {
+  .drag-board {
+    min-height: 180vh;
+  }
+  .drag-card {
+    width: clamp(140px, 55vw, 200px);
+  }
+}
+
+/* ==========================================================
    RESPONSIVE
    ========================================================== */
 @media (max-width: 720px) {
