@@ -1,73 +1,227 @@
-// Infinite pannable image canvas — drag anywhere to pan; images tile seamlessly forever
+// Infinite procedural image canvas (Cosmos.so-style explore page).
+//
+// The world is divided into fixed-size "chunks." Each chunk's contents
+// (how many images, what sizes, what positions) are generated the first
+// time it scrolls into view, using a seeded random generator keyed off
+// the chunk's coordinates — so panning back to a spot always shows the
+// same arrangement, but every new area looks freshly, organically laid out.
+// Chunks far outside the view are removed to keep the DOM light.
 (function () {
   const canvas = document.getElementById("infiniteCanvas");
   const world = document.getElementById("canvasWorld");
   if (!canvas || !world) return;
 
-  // One repeating "tile" of images. It's rendered in a grid of copies so
-  // panning in any direction always reveals more of the same pattern,
-  // creating the illusion of an infinite canvas.
-  const TILE_W = 900;
-  const TILE_H = 700;
+  const CHUNK_SIZE = 900;
+  const RENDER_BUFFER = CHUNK_SIZE * 1; // pre-render this far beyond the viewport
+  const CLEANUP_BUFFER = CHUNK_SIZE * 2; // remove chunks once this far outside
+  const SEED_POOL_SIZE = 40; // how many distinct placeholder photos to cycle through
 
-  const PATTERN = [
-    { seed: "devanshi01", x: 20, y: 20, w: 260, h: 320 },
-    { seed: "devanshi02", x: 300, y: 30, w: 280, h: 200 },
-    { seed: "devanshi03", x: 600, y: 20, w: 260, h: 260 },
-    { seed: "devanshi04", x: 40, y: 360, w: 260, h: 300 },
-    { seed: "devanshi05", x: 320, y: 250, w: 260, h: 320 },
-    { seed: "devanshi06", x: 600, y: 300, w: 260, h: 360 },
-  ];
+  // ---------- seeded randomness ----------
+  function mulberry32(seed) {
+    return function () {
+      seed |= 0;
+      seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
 
-  function buildGrid() {
-    world.innerHTML = "";
-    const rect = canvas.getBoundingClientRect();
-    const cols = Math.ceil(rect.width / TILE_W) + 2;
-    const rows = Math.ceil(rect.height / TILE_H) + 2;
+  function hashChunk(cx, cy) {
+    let h = cx * 374761393 + cy * 668265263;
+    h = (h ^ (h >>> 13)) * 1274126177;
+    h = h ^ (h >>> 16);
+    return h >>> 0;
+  }
 
-    for (let cx = -1; cx < cols; cx++) {
-      for (let cy = -1; cy < rows; cy++) {
-        PATTERN.forEach((item) => {
-          const tile = document.createElement("div");
-          tile.className = "canvas-tile";
-          tile.style.left = cx * TILE_W + item.x + "px";
-          tile.style.top = cy * TILE_H + item.y + "px";
-          tile.style.width = item.w + "px";
-          tile.style.height = item.h + "px";
+  function pickAspect(rand) {
+    const r = rand();
+    if (r < 0.34) return "portrait";
+    if (r < 0.67) return "landscape";
+    return "square";
+  }
 
-          const img = document.createElement("img");
-          img.src =
-            "https://picsum.photos/seed/" +
-            item.seed +
-            "/" +
-            item.w * 2 +
-            "/" +
-            item.h * 2;
-          img.alt = "Work placeholder";
-          img.draggable = false;
+  function sizeFromAspect(base, aspect) {
+    if (aspect === "portrait") return { w: base, h: base * 1.3 };
+    if (aspect === "landscape") return { w: base * 1.3, h: base };
+    return { w: base, h: base };
+  }
 
-          tile.appendChild(img);
-          world.appendChild(tile);
-        });
+  function overlapRatio(a, b) {
+    const ow = Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x));
+    const oh = Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+    const overlapArea = ow * oh;
+    const minArea = Math.min(a.w * a.h, b.w * b.h);
+    return minArea > 0 ? overlapArea / minArea : 0;
+  }
+
+  // ---------- procedural chunk content ----------
+  function generateChunkItems(cx, cy) {
+    const rand = mulberry32(hashChunk(cx, cy));
+    const items = [];
+    const isFocalChunk = rand() < 0.22;
+
+    if (isFocalChunk) {
+      const base = 650 + rand() * 300;
+      const aspect = pickAspect(rand());
+      const { w, h } = sizeFromAspect(base, aspect);
+      const marginX = CHUNK_SIZE * 0.08;
+      const marginY = CHUNK_SIZE * 0.08;
+      const x = marginX + rand() * Math.max(1, CHUNK_SIZE - w - marginX * 2);
+      const y = marginY + rand() * Math.max(1, CHUNK_SIZE - h - marginY * 2);
+      items.push({ rand, x, y, w, h });
+
+      if (rand() < 0.5) {
+        const base2 = 160 + rand() * 100;
+        const aspect2 = pickAspect(rand());
+        const size2 = sizeFromAspect(base2, aspect2);
+        for (let attempt = 0; attempt < 6; attempt++) {
+          const x2 = rand() * Math.max(1, CHUNK_SIZE - size2.w);
+          const y2 = rand() * Math.max(1, CHUNK_SIZE - size2.h);
+          const rect2 = { x: x2, y: y2, w: size2.w, h: size2.h };
+          if (overlapRatio({ x, y, w, h }, rect2) < 0.15) {
+            items.push({ rand, x: x2, y: y2, w: size2.w, h: size2.h });
+            break;
+          }
+        }
+      }
+    } else {
+      const count = 3 + Math.floor(rand() * 3);
+      const placedRects = [];
+      for (let i = 0; i < count; i++) {
+        const sizeRoll = rand();
+        let base;
+        if (sizeRoll < 0.35) base = 160 + rand() * 100;
+        else if (sizeRoll < 0.8) base = 280 + rand() * 140;
+        else base = 440 + rand() * 180;
+
+        const aspect = pickAspect(rand());
+        const { w, h } = sizeFromAspect(base, aspect);
+
+        let bestRect = null;
+        for (let attempt = 0; attempt < 6; attempt++) {
+          const x = rand() * Math.max(1, CHUNK_SIZE - w);
+          const y = rand() * Math.max(1, CHUNK_SIZE - h);
+          const rect = { x, y, w, h };
+          const badOverlap = placedRects.some((r) => overlapRatio(r, rect) > 0.3);
+          bestRect = rect;
+          if (!badOverlap) break;
+        }
+        placedRects.push(bestRect);
+        items.push({ rand, x: bestRect.x, y: bestRect.y, w: bestRect.w, h: bestRect.h });
       }
     }
+
+    return items.map((item) => {
+      const seedIndex = Math.floor(item.rand() * SEED_POOL_SIZE);
+      return {
+        seedIndex,
+        worldX: cx * CHUNK_SIZE + item.x,
+        worldY: cy * CHUNK_SIZE + item.y,
+        w: item.w,
+        h: item.h,
+      };
+    });
   }
 
-  buildGrid();
+  function createTileElement(item) {
+    const tile = document.createElement("div");
+    tile.className = "canvas-tile";
+    tile.style.left = item.worldX + "px";
+    tile.style.top = item.worldY + "px";
+    tile.style.width = item.w + "px";
+    tile.style.height = item.h + "px";
 
-  let resizeTimer;
-  window.addEventListener("resize", () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(buildGrid, 150);
-  });
+    const img = document.createElement("img");
+    img.loading = "lazy";
+    img.decoding = "async";
+    img.draggable = false;
+    img.alt = "";
+    img.src =
+      "https://picsum.photos/seed/devanshi-" +
+      item.seedIndex +
+      "/" +
+      Math.round(item.w * 1.6) +
+      "/" +
+      Math.round(item.h * 1.6);
 
-  // --- Panning with inertia ---
+    tile.appendChild(img);
+    return tile;
+  }
+
+  // ---------- chunk virtualization ----------
+  const activeChunks = new Map(); // "cx,cy" -> [elements]
+
+  function renderChunk(cx, cy, key) {
+    const items = generateChunkItems(cx, cy);
+    const els = items.map(createTileElement);
+    els.forEach((el) => world.appendChild(el));
+    activeChunks.set(key, els);
+  }
+
+  function updateChunks() {
+    const rect = canvas.getBoundingClientRect();
+
+    const worldMinX = -offsetX - RENDER_BUFFER;
+    const worldMaxX = -offsetX + rect.width + RENDER_BUFFER;
+    const worldMinY = -offsetY - RENDER_BUFFER;
+    const worldMaxY = -offsetY + rect.height + RENDER_BUFFER;
+
+    const cMinX = Math.floor(worldMinX / CHUNK_SIZE);
+    const cMaxX = Math.floor(worldMaxX / CHUNK_SIZE);
+    const cMinY = Math.floor(worldMinY / CHUNK_SIZE);
+    const cMaxY = Math.floor(worldMaxY / CHUNK_SIZE);
+
+    const needed = new Set();
+    for (let cx = cMinX; cx <= cMaxX; cx++) {
+      for (let cy = cMinY; cy <= cMaxY; cy++) {
+        const key = cx + "," + cy;
+        needed.add(key);
+        if (!activeChunks.has(key)) {
+          renderChunk(cx, cy, key);
+        }
+      }
+    }
+
+    const wMinXc = -offsetX - CLEANUP_BUFFER;
+    const wMaxXc = -offsetX + rect.width + CLEANUP_BUFFER;
+    const wMinYc = -offsetY - CLEANUP_BUFFER;
+    const wMaxYc = -offsetY + rect.height + CLEANUP_BUFFER;
+
+    activeChunks.forEach((els, key) => {
+      if (needed.has(key)) return;
+      const [cxStr, cyStr] = key.split(",");
+      const cx = parseInt(cxStr, 10);
+      const cy = parseInt(cyStr, 10);
+      const chunkWorldX = cx * CHUNK_SIZE;
+      const chunkWorldY = cy * CHUNK_SIZE;
+
+      const outOfRange =
+        chunkWorldX + CHUNK_SIZE < wMinXc ||
+        chunkWorldX > wMaxXc ||
+        chunkWorldY + CHUNK_SIZE < wMinYc ||
+        chunkWorldY > wMaxYc;
+
+      if (outOfRange) {
+        els.forEach((el) => el.remove());
+        activeChunks.delete(key);
+      }
+    });
+  }
+
+  let chunkUpdateScheduled = false;
+  function scheduleChunkUpdate() {
+    if (chunkUpdateScheduled) return;
+    chunkUpdateScheduled = true;
+    requestAnimationFrame(() => {
+      updateChunks();
+      chunkUpdateScheduled = false;
+    });
+  }
+
+  // ---------- panning (drag + wheel/trackpad) with inertia ----------
   let offsetX = 0;
   let offsetY = 0;
-
-  function wrap(value, size) {
-    return ((value % size) + size) % size;
-  }
 
   function applyTransform() {
     world.style.transform = "translate3d(" + offsetX + "px, " + offsetY + "px, 0)";
@@ -88,11 +242,12 @@
   const STOP_THRESHOLD = 0.03;
 
   function momentumTick() {
-    offsetX = wrap(offsetX + velX, TILE_W);
-    offsetY = wrap(offsetY + velY, TILE_H);
+    offsetX += velX;
+    offsetY += velY;
     velX *= FRICTION;
     velY *= FRICTION;
     applyTransform();
+    scheduleChunkUpdate();
 
     if (Math.abs(velX) > STOP_THRESHOLD || Math.abs(velY) > STOP_THRESHOLD) {
       requestAnimationFrame(momentumTick);
@@ -123,9 +278,10 @@
     const dx = e.clientX - dragStartPointerX;
     const dy = e.clientY - dragStartPointerY;
 
-    offsetX = wrap(dragStartOffsetX + dx, TILE_W);
-    offsetY = wrap(dragStartOffsetY + dy, TILE_H);
+    offsetX = dragStartOffsetX + dx;
+    offsetY = dragStartOffsetY + dy;
     applyTransform();
+    scheduleChunkUpdate();
 
     const now = performance.now();
     const dt = Math.max(now - lastTime, 1);
@@ -156,4 +312,25 @@
 
   canvas.addEventListener("pointerup", endDrag);
   canvas.addEventListener("pointercancel", endDrag);
+
+  // Trackpad / mouse wheel pans the canvas instead of scrolling the page
+  canvas.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+      offsetX -= e.deltaX;
+      offsetY -= e.deltaY;
+      applyTransform();
+      scheduleChunkUpdate();
+    },
+    { passive: false }
+  );
+
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(scheduleChunkUpdate, 150);
+  });
+
+  updateChunks();
 })();
