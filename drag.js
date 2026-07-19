@@ -209,5 +209,3 @@
     card.addEventListener("pointercancel", endDrag);
   });
 })();
-
-    
