@@ -630,7 +630,7 @@ a {
   position: absolute;
   top: 0;
   left: 0;
-  width: clamp(240px, 30vw, 460px);
+  width: clamp(160px, 20vw, 240px);
   border: 3px solid var(--black);
   background: var(--black);
   cursor: grab;
@@ -676,7 +676,34 @@ body.is-dragging {
     height: 100vh;
   }
   .drag-card {
-    width: clamp(180px, 60vw, 280px);
+    width: clamp(140px, 50vw, 200px);
+  }
+}
+ 
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+@media (max-width: 720px) {
+  .site-header__nav {
+    display: none;
+  }
+  .menu-toggle {
+    display: inline-block;
+  }
+  .work__grid {
+    grid-template-columns: 1fr;
+  }
+  .manifesto__text--right {
+    text-align: left;
+    margin-left: 0;
+  }
+  .hero__scroll {
+    position: static;
+    margin-top: 40px;
+    display: inline-block;
+  }
+  .hero {
+    align-items: flex-start;
   }
 }
 
