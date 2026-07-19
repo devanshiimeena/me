@@ -124,6 +124,40 @@
     });
   }
 
+  // Generates a simple placeholder image entirely locally (no network request),
+  // so tiles always render even offline or if an external image host is blocked.
+  // Swap this out later for real photos — see createTileElement() below.
+  function placeholderDataUri(w, h, seedIndex) {
+    const isDark = seedIndex % 2 === 0;
+    const bg = isDark ? "%230a0a0a" : "%23ffffff";
+    const line = isDark ? "%23ffffff" : "%230a0a0a";
+    const svg =
+      "<svg xmlns='http://www.w3.org/2000/svg' width='" +
+      w +
+      "' height='" +
+      h +
+      "'>" +
+      "<rect width='100%25' height='100%25' fill='" +
+      bg +
+      "'/>" +
+      "<line x1='0' y1='0' x2='" +
+      w +
+      "' y2='" +
+      h +
+      "' stroke='" +
+      line +
+      "' stroke-width='2' stroke-opacity='0.25'/>" +
+      "<line x1='" +
+      w +
+      "' y1='0' x2='0' y2='" +
+      h +
+      "' stroke='" +
+      line +
+      "' stroke-width='2' stroke-opacity='0.25'/>" +
+      "</svg>";
+    return "data:image/svg+xml," + svg;
+  }
+
   function createTileElement(item) {
     const tile = document.createElement("div");
     tile.className = "canvas-tile";
@@ -137,13 +171,11 @@
     img.decoding = "async";
     img.draggable = false;
     img.alt = "";
-    img.src =
-      "https://picsum.photos/seed/devanshi-" +
-      item.seedIndex +
-      "/" +
-      Math.round(item.w * 1.6) +
-      "/" +
-      Math.round(item.h * 1.6);
+
+    // PLACEHOLDER — replace this line with your own image source once you
+    // have real work to show, e.g.:
+    //   img.src = "images/project-" + item.seedIndex + ".jpg";
+    img.src = placeholderDataUri(Math.round(item.w), Math.round(item.h), item.seedIndex);
 
     tile.appendChild(img);
     return tile;
