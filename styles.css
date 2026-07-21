@@ -740,3 +740,45 @@ button:focus-visible {
   outline: 3px solid var(--black);
   outline-offset: 3px;
 }
+
+/* ==========================================================
+   WORK GALLERY
+   ========================================================== */
+.gallery-section {
+  background: var(--black);
+  padding: clamp(60px, 10vw, 140px) var(--edge);
+  border-bottom: 3px solid var(--black);
+  overflow: hidden;
+}
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(10px, 2vw, 24px);
+  align-items: start;
+}
+.gallery__column {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 2vw, 24px);
+  will-change: transform;
+}
+.gallery__item {
+  width: 100%;
+}
+.gallery__item img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  filter: grayscale(100%) contrast(1.1);
+  transition: filter 0.3s ease;
+}
+.gallery__item:hover img {
+  filter: grayscale(0%);
+}
+@media (max-width: 900px) {
+  .gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
