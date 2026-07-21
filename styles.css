@@ -601,110 +601,28 @@ a {
 }
 
 /* ==========================================================
-   DRAG BOARD (WORK PAGE — FLOATING DRAGGABLE IMAGE COLLAGE)
+   WORK PAGE — INFINITE PANNABLE IMAGE CANVAS
    ========================================================== */
-.drag-board {
-  position: relative;
-  width: 100%;
-  height: 100vh;
+.canvas-tile {
+  position: absolute;
   overflow: hidden;
-  border-bottom: 3px solid var(--black);
-  background: var(--pink);
-  touch-action: none;
+  pointer-events: auto;
+  transition: transform 0.25s ease;
 }
- 
-.drag-board__hint {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  z-index: 999;
-  pointer-events: none;
+
+.canvas-tile:hover {
+  transform: scale(1.035);
+  z-index: 50;
 }
- 
-.drag-card {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: clamp(160px, 20vw, 240px);
-  border: 3px solid var(--black);
-  background: var(--black);
-  cursor: grab;
-  will-change: transform;
-  touch-action: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
- 
-.drag-card--tall {
-  aspect-ratio: 3 / 4;
-}
- 
-.drag-card--wide {
-  aspect-ratio: 4 / 3;
-}
- 
-.drag-card--square {
-  aspect-ratio: 1 / 1;
-}
- 
-.drag-card img {
+
+.canvas-tile img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   pointer-events: none;
   -webkit-user-drag: none;
-}
- 
-.drag-card.dragging {
-  cursor: grabbing;
-  z-index: 500;
-}
- 
-body.is-dragging {
-  -webkit-user-select: none;
   user-select: none;
-}
- 
-@media (max-width: 720px) {
-  .drag-board {
-    height: 100vh;
-  }
-  .drag-card {
-    width: clamp(140px, 50vw, 200px);
-  }
-}
- 
-/* ==========================================================
-   RESPONSIVE
-   ========================================================== */
-@media (max-width: 720px) {
-  .site-header__nav {
-    display: none;
-  }
-  .menu-toggle {
-    display: inline-block;
-  }
-  .work__grid {
-    grid-template-columns: 1fr;
-  }
-  .manifesto__text--right {
-    text-align: left;
-    margin-left: 0;
-  }
-  .hero__scroll {
-    position: static;
-    margin-top: 40px;
-    display: inline-block;
-  }
-  .hero {
-    align-items: flex-start;
-  }
 }
 
 /* ==========================================================
