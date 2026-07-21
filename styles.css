@@ -513,14 +513,25 @@ a {
 }
 
 @media (min-width: 640px) {
+  .blog-list__item {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    grid-template-areas: 
+      "date title"
+      ". excerpt";
+    column-gap: 28px;
+    row-gap: 6px;
+    align-items: baseline;
+  }
+  .blog-list__date {
+    grid-area: date;
+  }
   .blog-list__title {
-    flex: 1 1 auto;
-    order: 0;
+    grid-area: title;
   }
   .blog-list__excerpt {
-    flex: 0 0 100%;
-    order: 3;
-    margin-left: 118px;
+    grid-area: excerpt;
+    margin-left: 0;
   }
 }
 
