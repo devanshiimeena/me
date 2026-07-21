@@ -95,44 +95,53 @@ magneticElements.forEach((item) => {
   let targetScale = 0;
   let currentScale = 0;
   let seed = 0;
+  let lastX = 0;
+  let lastY = 0;
+  let moveSpeed = 0;
   
   document.addEventListener('mousemove', (e) => {
     let isHovering = false;
-    let speed = 0;
-
+    
     fullbleedSections.forEach(section => {
       const rect = section.getBoundingClientRect();
-      // Add a generous buffer zone around the text area
       if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top - 50 && e.clientY <= rect.bottom + 50) {
         isHovering = true;
-        // Calculate distance from center for variable distortion
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const dist = Math.sqrt(Math.pow(e.clientX - centerX, 2) + Math.pow(e.clientY - centerY, 2));
-        speed = Math.min(dist * 0.05, 15);
       }
     });
+
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+    const speed = Math.sqrt(dx*dx + dy*dy);
     
-    // Scale jumps up based on movement and settles back quickly
-    targetScale = isHovering ? 15 + speed : 0;
+    if (isHovering && speed > 0) {
+      targetScale = Math.min(speed * 2, 35);
+      moveSpeed = speed;
+    }
+    
+    lastX = e.clientX;
+    lastY = e.clientY;
   });
   
   function animateWave() {
     currentScale += (targetScale - currentScale) * 0.1;
     
-    // Animate the noise phase/seed to make it look like a rolling wave
-    seed += 0.05;
-    turbulence.setAttribute("seed", Math.floor(seed));
-    
-    // Slightly shift the frequency over time for breathing effect
-    const time = performance.now() * 0.0005;
-    turbulence.setAttribute("baseFrequency", `${0.01 + Math.sin(time)*0.002} ${0.02 + Math.cos(time)*0.005}`);
+    if (moveSpeed > 0.1) {
+      seed += moveSpeed * 0.05;
+      turbulence.setAttribute("seed", Math.floor(seed));
+      const freq1 = 0.01 + Math.sin(seed * 0.1) * 0.005;
+      const freq2 = 0.02 + Math.cos(seed * 0.1) * 0.005;
+      turbulence.setAttribute("baseFrequency", `${freq1} ${freq2}`);
+    }
 
     if (currentScale > 0.1) {
       displacement.setAttribute("scale", currentScale.toFixed(2));
     } else {
       displacement.setAttribute("scale", "0");
     }
+    
+    // Decay the target scale and movement speed so it stops when mouse stops
+    targetScale *= 0.9;
+    moveSpeed *= 0.9;
     
     requestAnimationFrame(animateWave);
   }
