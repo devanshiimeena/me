@@ -760,10 +760,15 @@ body, a, button {
   background: var(--pink); /* Matches the hero background */
 }
 
+/* Ensure the text stays on top of the canvas */
 .hero__headline-container,
 .hero__headline,
-.hero__sub,
-.hero__scroll {
+.hero__sub {
   position: relative;
-  z-index: 1; /* Ensures your text stays on top of the canvas */
+  z-index: 1; 
+}
+
+/* Give the scroll button a z-index without overriding its absolute position! */
+.hero__scroll {
+  z-index: 1; 
 }
