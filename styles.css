@@ -325,7 +325,22 @@ a {
   text-transform: uppercase;
   letter-spacing: -0.01em;
 }
+.work__name {
+  font-size: clamp(24px, 3.4vw, 40px);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  display: block; /* Added this so the description drops to the next line */
+}
 
+.work__desc {
+  font-size: clamp(14px, 1.4vw, 16px);
+  font-weight: 500;
+  margin-top: 10px;
+  line-height: 1.4;
+  opacity: 0.85;
+  text-transform: none;
+}
 .work__meta {
   font-size: 13px;
   font-weight: bold;
