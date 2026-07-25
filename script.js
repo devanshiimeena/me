@@ -176,3 +176,90 @@ magneticElements.forEach((item) => {
   });
 })();
 
+/* ==========================================================
+   CURSOR & REVEAL EFFECT (APPEND TO BOTTOM)
+   ========================================================== */
+:root {
+  --mask-x: 50vw;
+  --mask-y: 50vh;
+  --cursor-x: 50vw;
+  --cursor-y: 50vh;
+}
+
+body, a, button {
+  cursor: none !important; 
+}
+
+.hero {
+  overflow: hidden; /* Ensure glass mask stays inside hero */
+}
+
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  background: var(--black); 
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  mix-blend-mode: exclusion;
+  transform: translate3d(calc(var(--cursor-x) - 50%), calc(var(--cursor-y) - 50%), 0);
+  transition: width 0.2s, height 0.2s;
+}
+
+.char {
+  display: inline-block;
+  will-change: transform;
+}
+
+.hero__headline[data-layer="base"] {
+  position: relative;
+  z-index: 1;
+}
+
+.reveal-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: var(--edge);
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.reveal-layer-1 {
+  mask-image: radial-gradient(circle at var(--mask-x) var(--mask-y), black 0%, rgba(0,0,0,0.6) 120px, transparent 350px);
+  -webkit-mask-image: radial-gradient(circle at var(--mask-x) var(--mask-y), black 0%, rgba(0,0,0,0.6) 120px, transparent 350px);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  filter: url('#liquid');
+  z-index: 2;
+}
+
+.reveal-layer-1 .hero__headline {
+  color: var(--pink); 
+  text-shadow: -4px 0 15px rgba(255, 255, 255, 0.4), 4px 0 15px rgba(0, 0, 0, 0.4);
+  filter: blur(2px);
+}
+
+.reveal-layer-2 {
+  mask-image: radial-gradient(circle at var(--mask-x) var(--mask-y), black 0%, rgba(0,0,0,0.8) 60px, transparent 180px);
+  -webkit-mask-image: radial-gradient(circle at var(--mask-x) var(--mask-y), black 0%, rgba(0,0,0,0.8) 60px, transparent 180px);
+  backdrop-filter: blur(24px) brightness(1.3) contrast(1.2);
+  -webkit-backdrop-filter: blur(24px) brightness(1.3) contrast(1.2);
+  filter: url('#liquid-intense');
+  z-index: 3;
+}
+
+.reveal-layer-2 .hero__headline {
+  color: var(--white);
+  text-shadow: -5px 0 0 var(--black), 5px 0 0 var(--black), 0 0 40px rgba(255, 255, 255, 0.8);
+}
