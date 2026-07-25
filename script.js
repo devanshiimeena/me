@@ -149,11 +149,67 @@ magneticElements.forEach((item) => {
   requestAnimationFrame(animateWave);
 })();
 
-// Opposite-Direction Scroll Gallery Logic
+/* ==========================================================
+   HORIZONTAL SCALING CAROUSEL LOGIC
+   ========================================================== */
 (function() {
-  const gallery = document.querySelector(".gallery-section");
-  const columns = document.querySelectorAll(".gallery__column");
-  if (!gallery || columns.length === 0) return;
+  const track = document.getElementById("carouselTrack");
+  if (!track) return;
+
+  const originalItems = Array.from(track.querySelectorAll(".carousel-item"));
+  if (originalItems.length === 0) return;
+
+  // Clone the images twice so they loop infinitely and seamlessly
+  originalItems.forEach(item => track.appendChild(item.cloneNode(true)));
+  originalItems.forEach(item => track.appendChild(item.cloneNode(true)));
+
+  const allItems = Array.from(track.querySelectorAll(".carousel-item"));
+  let currentX = 0;
+  const speed = 1.2; // You can adjust this to make it pan faster or slower!
+
+  function animateCarousel() {
+    currentX -= speed;
+
+    // Measure the exact width of a single set of images to loop seamlessly
+    const itemWidth = originalItems[0].offsetWidth;
+    const gap = parseFloat(window.getComputedStyle(track).gap) || 0;
+    const singleSetWidth = (itemWidth + gap) * originalItems.length;
+
+    // Snap back instantly when we reach the end of the first set
+    if (Math.abs(currentX) >= singleSetWidth) {
+      currentX += singleSetWidth;
+    }
+
+    track.style.transform = `translate3d(${currentX}px, 0, 0)`;
+
+    // Calculate scaling logic based on screen center
+    const viewportCenter = window.innerWidth / 2;
+    
+    allItems.forEach(item => {
+      const rect = item.getBoundingClientRect();
+      const itemCenter = rect.left + rect.width / 2;
+      const distanceFromCenter = Math.abs(viewportCenter - itemCenter);
+      
+      const maxDistance = window.innerWidth / 1.5; 
+      
+      // Images grow to 1.15 scale when in the middle, and shrink to 0.85 when on the sides
+      let scale = 1.15 - (distanceFromCenter / maxDistance) * 0.35;
+      scale = Math.max(0.85, Math.min(1.15, scale));
+      
+      // Images fade out slightly on the edges for a cinematic vignette effect
+      let opacity = 1 - (distanceFromCenter / maxDistance) * 0.5;
+      opacity = Math.max(0.3, Math.min(1, opacity));
+
+      item.style.transform = `scale(${scale})`;
+      item.style.opacity = opacity;
+    });
+
+    requestAnimationFrame(animateCarousel);
+  }
+
+  // Kick off the loop
+  requestAnimationFrame(animateCarousel);
+})();
 
   // We only want the effect to run on desktop, or we can run it everywhere. Let run it everywhere but subtly.
   window.addEventListener("scroll", () => {
