@@ -763,12 +763,10 @@ button:focus-visible {
 .slide {
   margin: 0;
   position: absolute;
-  top: 0;
+  top: 50%; /* Switched from top: 0 to top: 50% to push it to the middle! */
   left: 50%;
-  /* Increased from 280px to 400px */
   width: 400px; 
-  /* Must always be exactly half of the width (was -140px) */
-  margin-left: -200px; 
+  /* Removed margin-left entirely because JavaScript will perfectly center it now */
   cursor: pointer;
   transform-style: preserve-3d;
   transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1),
@@ -777,9 +775,8 @@ button:focus-visible {
 
 @media (max-width: 720px) {
   .slide { 
-    /* Increased mobile width from 200px to 260px */
     width: 260px; 
-    margin-left: -130px; 
+    /* Removed margin-left here too */
   }
 }
 
