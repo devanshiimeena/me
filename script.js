@@ -1,4 +1,3 @@
-```javascript
 // Mobile menu toggle
 const menuToggle = document.querySelector(".menu-toggle");
 const mobileMenu = document.getElementById("mobileMenu");
@@ -416,4 +415,3 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(section);
   });
 });
-```
