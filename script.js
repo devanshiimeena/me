@@ -177,89 +177,132 @@ magneticElements.forEach((item) => {
 })();
 
 /* ==========================================================
-   CURSOR & REVEAL EFFECT (APPEND TO BOTTOM)
+   HERO REVEAL PHYSICS (APPEND TO BOTTOM)
    ========================================================== */
-:root {
-  --mask-x: 50vw;
-  --mask-y: 50vh;
-  --cursor-x: 50vw;
-  --cursor-y: 50vh;
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const headlines = document.querySelectorAll('.hero__headline');
+    
+    headlines.forEach(headline => {
+        const walker = document.createTreeWalker(headline, NodeFilter.SHOW_TEXT, null, false);
+        const textNodes = [];
+        while(walker.nextNode()) textNodes.push(walker.currentNode);
+        
+        textNodes.forEach(node => {
+            const text = node.nodeValue;
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (char.trim() === '') {
+                    fragment.appendChild(document.createTextNode(char));
+                } else {
+                    const span = document.createElement('span');
+                    span.className = 'char';
+                    span.textContent = char;
+                    fragment.appendChild(span);
+                }
+            }
+            node.parentNode.replaceChild(fragment, node);
+        });
+    });
 
-body, a, button {
-  cursor: none !important; 
-}
+    let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    let smoothMouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    let vel = { x: 0, y: 0 };
+    const tension = 0.08;
+    const friction = 0.8;
 
-.hero {
-  overflow: hidden; /* Ensure glass mask stays inside hero */
-}
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+    });
 
-.custom-cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 14px;
-  height: 14px;
-  background: var(--black); 
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 99999;
-  mix-blend-mode: exclusion;
-  transform: translate3d(calc(var(--cursor-x) - 50%), calc(var(--cursor-y) - 50%), 0);
-  transition: width 0.2s, height 0.2s;
-}
+    let chars = [];
+    
+    function initChars() {
+        const charElements = document.querySelectorAll('.char');
+        charElements.forEach(el => el.style.transform = 'none');
+        
+        chars = [];
+        charElements.forEach(charEl => {
+            const rect = charEl.getBoundingClientRect();
+            const headline = charEl.closest('.hero__headline');
+            const layer = headline.dataset.layer || 'base';
+            
+            let strength = 0.15;
+            if (layer === 'mid') strength = 0.35;
+            if (layer === 'top') strength = 0.6;
+            
+            chars.push({
+                el: charEl,
+                originX: rect.left + rect.width / 2,
+                originY: rect.top + rect.height / 2 + window.scrollY,
+                x: 0, 
+                y: 0,
+                velX: 0,
+                velY: 0,
+                strength: strength
+            });
+        });
+    }
 
-.char {
-  display: inline-block;
-  will-change: transform;
-}
+    setTimeout(initChars, 100);
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(initChars, 150);
+    });
 
-.hero__headline[data-layer="base"] {
-  position: relative;
-  z-index: 1;
-}
+    const hero = document.querySelector('.hero');
 
-.reveal-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  padding: var(--edge);
-  pointer-events: none;
-  z-index: 2;
-  overflow: hidden;
-}
+    function animate() {
+        vel.x += (mouse.x - smoothMouse.x) * tension;
+        vel.y += (mouse.y - smoothMouse.y) * tension;
+        vel.x *= friction;
+        vel.y *= friction;
+        smoothMouse.x += vel.x;
+        smoothMouse.y += vel.y;
 
-.reveal-layer-1 {
-  mask-image: radial-gradient(circle at var(--mask-x) var(--mask-y), black 0%, rgba(0,0,0,0.6) 120px, transparent 350px);
-  -webkit-mask-image: radial-gradient(circle at var(--mask-x) var(--mask-y), black 0%, rgba(0,0,0,0.6) 120px, transparent 350px);
-  backdrop-filter: blur(12px) saturate(1.2);
-  -webkit-backdrop-filter: blur(12px) saturate(1.2);
-  filter: url('#liquid');
-  z-index: 2;
-}
+        if (hero) {
+            const heroRect = hero.getBoundingClientRect();
+            const maskX = smoothMouse.x - heroRect.left;
+            const maskY = smoothMouse.y - heroRect.top;
+            document.documentElement.style.setProperty('--mask-x', `${maskX}px`);
+            document.documentElement.style.setProperty('--mask-y', `${maskY}px`);
+        }
 
-.reveal-layer-1 .hero__headline {
-  color: var(--pink); 
-  text-shadow: -4px 0 15px rgba(255, 255, 255, 0.4), 4px 0 15px rgba(0, 0, 0, 0.4);
-  filter: blur(2px);
-}
+        document.documentElement.style.setProperty('--cursor-x', `${mouse.x}px`);
+        document.documentElement.style.setProperty('--cursor-y', `${mouse.y}px`);
 
-.reveal-layer-2 {
-  mask-image: radial-gradient(circle at var(--mask-x) var(--mask-y), black 0%, rgba(0,0,0,0.8) 60px, transparent 180px);
-  -webkit-mask-image: radial-gradient(circle at var(--mask-x) var(--mask-y), black 0%, rgba(0,0,0,0.8) 60px, transparent 180px);
-  backdrop-filter: blur(24px) brightness(1.3) contrast(1.2);
-  -webkit-backdrop-filter: blur(24px) brightness(1.3) contrast(1.2);
-  filter: url('#liquid-intense');
-  z-index: 3;
-}
+        const docMouseY = smoothMouse.y + window.scrollY;
+        const maxDistance = 300;
+        
+        chars.forEach(char => {
+            const dx = smoothMouse.x - char.originX;
+            const dy = docMouseY - char.originY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            let targetX = 0;
+            let targetY = 0;
+            
+            if (dist < maxDistance) {
+                const pull = Math.pow((maxDistance - dist) / maxDistance, 2); 
+                targetX = dx * pull * char.strength;
+                targetY = dy * pull * char.strength;
+            }
+            
+            char.velX += (targetX - char.x) * 0.15;
+            char.velY += (targetY - char.y) * 0.15;
+            char.velX *= 0.75;
+            char.velY *= 0.75;
+            
+            char.x += char.velX;
+            char.y += char.velY;
+            
+            char.el.style.transform = `translate3d(${char.x}px, ${char.y}px, 0)`;
+        });
 
-.reveal-layer-2 .hero__headline {
-  color: var(--white);
-  text-shadow: -5px 0 0 var(--black), 5px 0 0 var(--black), 0 0 40px rgba(255, 255, 255, 0.8);
-}
+        requestAnimationFrame(animate);
+    }
+    
+    animate();
+});
