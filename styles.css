@@ -742,24 +742,33 @@ body, a, button {
 }
 
 /* ==========================================================
-   ASCII REVEAL BACKGROUND (UPDATED)
+   ASCII REVEAL BACKGROUND (HERO ONLY)
    ========================================================== */
-body {
-  /* Make body transparent so the interactive canvas shows through */
-  background: transparent !important;
-  
-  /* Notice I removed the color override, so your text stays BLACK! */
+.hero {
+  position: relative;
+  overflow: hidden; /* This traps the canvas inside the hero section! */
 }
 
 #ascii-bg {
-  position: fixed;
+  position: absolute; /* absolute, not fixed! */
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1;
+  width: 100%; /* 100%, not 100vw! */
+  height: 100%; /* 100%, not 100vh! */
+  z-index: 0; 
   pointer-events: none;
-  
-  /* Make the canvas background your original HOT PINK */
   background: var(--pink);
+}
+
+/* Ensure the text stays on top of the canvas */
+.hero__headline-container,
+.hero__headline,
+.hero__sub {
+  position: relative;
+  z-index: 1; 
+}
+
+/* Give the scroll button a z-index without breaking its absolute position */
+.hero__scroll {
+  z-index: 1; 
 }
