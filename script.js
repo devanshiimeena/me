@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ==========================================================
-   IMAGE REVEAL BACKGROUND (HERO ONLY)
+   CRAYON IMAGE REVEAL (HERO ONLY)
    ========================================================== */
 class RevealBackground {
   constructor(canvasElement, config = {}) {
@@ -201,26 +201,23 @@ class RevealBackground {
     this.ctx = this.canvas.getContext('2d');
     
     this.config = {
-      // Put your image link here! (It won't crash anymore)
       imageSrc: config.imageSrc || "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/e4476503-c1e3-4358-3ff6-539deda1f800/w=800",
-      revealSize: 120,
-      revealSoftness: 24,
-      blobCount: 5,
+      revealSize: 80,       // Size of the crayon brush tip
+      stayDuration: 2500,   // How long the stroke stays visible (2.5 seconds)
+      fadeDuration: 1000,   // How long it takes to fade out (1 second)
       ...config
     };
     
     this.revealCanvas = document.createElement('canvas');
     this.maskCanvas = document.createElement('canvas');
     
-    this.pointer = { x: -9999, y: -9999, inside: false };
-    this.blobs = Array.from({ length: this.config.blobCount }, () => ({ x: 0, y: 0 }));
-    this.seeded = false;
+    this.strokes = [];
+    this.lastPoint = null;
     
     this.coverRect = { dx: 0, dy: 0, dw: 0, dh: 0 };
     this.alive = true;
-    this.raf = null;
     this.img = null;
-    this.revealOpacity = 0; 
+    this.brush = null;
     
     this.init();
   }
@@ -249,36 +246,61 @@ class RevealBackground {
     }
   }
 
-  updatePhysics() {
-    if (this.blobs.length === 0) return;
-    const { dpr } = this.getSize();
+  // Generates a custom gritty crayon texture for the brush tip
+  createCrayonBrush() {
+    const radius = this.config.revealSize * (Math.min(window.devicePixelRatio || 1, 2));
+    const c = document.createElement('canvas');
+    c.width = radius * 2;
+    c.height = radius * 2;
+    const ctx = c.getContext('2d');
     
-    const tx = this.pointer.x * dpr;
-    const ty = this.pointer.y * dpr;
+    ctx.fillStyle = '#FFFFFF';
     
-    if (!this.seeded && this.pointer.inside) {
-      for (const blob of this.blobs) {
-        blob.x = tx;
-        blob.y = ty;
-      }
-      this.seeded = true;
-    }
-    
-    if (this.seeded) {
-      this.blobs[0].x += (tx - this.blobs[0].x) * 0.35;
-      this.blobs[0].y += (ty - this.blobs[0].y) * 0.35;
+    // Draw 400 random gritty particles to form the crayon stamp
+    for (let i = 0; i < 400; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const r = (Math.random() + Math.random()) / 2; // Bias towards center
+      const dist = r * radius * 0.95;
       
-      for (let i = 1; i < this.blobs.length; i++) {
-        this.blobs[i].x += (this.blobs[i-1].x - this.blobs[i].x) * 0.35;
-        this.blobs[i].y += (this.blobs[i-1].y - this.blobs[i].y) * 0.35;
+      const px = radius + Math.cos(angle) * dist;
+      const py = radius + Math.sin(angle) * dist;
+      
+      const size = Math.random() * (radius * 0.1) + 1;
+      
+      ctx.globalAlpha = Math.random() * 0.7 + 0.1;
+      ctx.beginPath();
+      ctx.arc(px, py, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    this.brush = c;
+    this.brushRadius = radius;
+  }
+
+  addStroke(tx, ty) {
+    const now = Date.now();
+    
+    // Interpolate points between fast mouse movements so the line doesn't break
+    if (this.lastPoint) {
+      const dx = tx - this.lastPoint.x;
+      const dy = ty - this.lastPoint.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const step = (this.config.revealSize * 0.15); // Stamp every 15% of brush size
+      
+      if (dist > step) {
+        const count = Math.floor(dist / step);
+        for (let i = 1; i <= count; i++) {
+          this.strokes.push({
+            x: this.lastPoint.x + dx * (i / count),
+            y: this.lastPoint.y + dy * (i / count),
+            birth: now
+          });
+        }
       }
     }
-
-    if (this.pointer.inside) {
-      this.revealOpacity += (1 - this.revealOpacity) * 0.1;
-    } else {
-      this.revealOpacity += (0 - this.revealOpacity) * 0.05; 
-    }
+    
+    this.strokes.push({ x: tx, y: ty, birth: now });
+    this.lastPoint = { x: tx, y: ty };
   }
 
   resize() {
@@ -286,6 +308,8 @@ class RevealBackground {
     const { w, h, dpr } = this.getSize();
     this.canvas.width = Math.max(1, Math.round(w * dpr));
     this.canvas.height = Math.max(1, Math.round(h * dpr));
+    
+    this.createCrayonBrush(); 
     
     this.coverRect = this.placeRect(
       this.img.width, this.img.height,
@@ -296,10 +320,16 @@ class RevealBackground {
   paint() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     
-    if (!this.img || this.revealOpacity < 0.01) return;
+    if (!this.img || this.strokes.length === 0) return;
     
-    const { dpr } = this.getSize();
+    const now = Date.now();
+    const maxAge = this.config.stayDuration + this.config.fadeDuration;
     
+    // Garbage collect strokes that have fully faded away
+    this.strokes = this.strokes.filter(s => (now - s.birth) < maxAge);
+    
+    if (this.strokes.length === 0) return;
+
     this.ensureLayer(this.revealCanvas);
     this.ensureLayer(this.maskCanvas);
     
@@ -311,64 +341,63 @@ class RevealBackground {
     pctx.drawImage(this.img, this.coverRect.dx, this.coverRect.dy, this.coverRect.dw, this.coverRect.dh);
     
     mctx.clearRect(0, 0, this.maskCanvas.width, this.maskCanvas.height);
-    mctx.save();
-    mctx.filter = `blur(${(this.config.revealSoftness * dpr).toFixed(1)}px)`;
-    mctx.fillStyle = "#FFFFFF";
     
-    for (let i = 0; i < this.blobs.length; i++) {
-      const t = this.blobs.length <= 1 ? 0 : i / (this.blobs.length - 1);
-      const radius = this.config.revealSize * dpr * (1 - t * 0.5);
-      mctx.beginPath();
-      mctx.arc(this.blobs[i].x, this.blobs[i].y, radius, 0, Math.PI * 2);
-      mctx.fill();
+    // Draw all active crayon strokes
+    for (const s of this.strokes) {
+      const age = now - s.birth;
+      let alpha = 1;
+      
+      // If it's older than stayDuration, start fading it out
+      if (age > this.config.stayDuration) {
+        alpha = 1 - ((age - this.config.stayDuration) / this.config.fadeDuration);
+      }
+      
+      mctx.globalAlpha = Math.max(0, alpha);
+      mctx.drawImage(this.brush, s.x - this.brushRadius, s.y - this.brushRadius);
     }
-    mctx.restore();
     
     pctx.globalCompositeOperation = "destination-in";
     pctx.drawImage(this.maskCanvas, 0, 0);
     
-    this.ctx.globalAlpha = this.revealOpacity;
+    this.ctx.globalAlpha = 1.0;
     this.ctx.globalCompositeOperation = "source-over";
     this.ctx.drawImage(this.revealCanvas, 0, 0);
-    this.ctx.globalAlpha = 1.0;
   }
 
   loop = () => {
     if (!this.alive) return;
-    this.updatePhysics();
     this.paint();
-    this.raf = requestAnimationFrame(this.loop);
+    requestAnimationFrame(this.loop);
   }
 
   init() {
     this.img = new Image();
-    this.img.src = this.config.imageSrc; // No crossOrigin blocks anymore!
+    this.img.src = this.config.imageSrc; 
     
     this.img.onload = () => {
       if (!this.alive) return;
       this.resize();
       this.paint();
-      this.raf = requestAnimationFrame(this.loop);
+      requestAnimationFrame(this.loop);
     };
     
     window.addEventListener('resize', () => {
       this.resize();
-      this.paint();
     });
     
     const container = this.canvas.parentElement;
     
     container.addEventListener('mousemove', (e) => {
       const rect = container.getBoundingClientRect();
-      this.pointer.x = e.clientX - rect.left;
-      this.pointer.y = e.clientY - rect.top;
-      this.pointer.inside = true;
+      const { dpr } = this.getSize();
+      const tx = (e.clientX - rect.left) * dpr;
+      const ty = (e.clientY - rect.top) * dpr;
+      this.addStroke(tx, ty);
     });
     
     container.addEventListener('mouseout', (e) => {
       if (!container.contains(e.relatedTarget)) {
-        this.pointer.inside = false;
-        this.seeded = false;
+        this.lastPoint = null; // Lift the crayon off the page when mouse leaves
       }
     });
   }
