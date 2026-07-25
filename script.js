@@ -208,7 +208,7 @@ class AsciiRevealBackground {
       invert: false,
       contrast: 100,
       inkColor: "#FFFFFF",
-      asciiOpacity: 0.15,
+      asciiOpacity: 0,
       revealSize: 120,
       revealSoftness: 24,
       blobCount: 5,
