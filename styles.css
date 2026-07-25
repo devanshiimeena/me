@@ -752,3 +752,29 @@ button:focus-visible {
 .hero__scroll {
   z-index: 1; 
 }
+
+/* ==========================================================
+   SCROLL SPY (ACTIVE LINK HIGHLIGHT)
+   ========================================================== */
+/* Keep the underline permanently drawn for the active section */
+.site-header__nav a.active::after {
+  width: 100%;
+}
+
+/* Optional: Highlight for the mobile menu */
+.mobile-menu a.active {
+  background: var(--black);
+  color: var(--pink);
+}
+
+/* ==========================================================
+   PARALLAX SCROLL CONTAINER
+   ========================================================== */
+.parallax-container {
+  position: relative;
+}
+
+.parallax-section {
+  position: relative;
+  background: transparent;
+}
