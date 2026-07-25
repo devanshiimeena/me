@@ -742,11 +742,13 @@ body, a, button {
 }
 
 /* ==========================================================
-   ASCII REVEAL BACKGROUND (APPEND TO BOTTOM)
+   ASCII REVEAL BACKGROUND (UPDATED)
    ========================================================== */
 body {
+  /* Make body transparent so the interactive canvas shows through */
   background: transparent !important;
-  color: var(--white) !important;
+  
+  /* Notice I removed the color override, so your text stays BLACK! */
 }
 
 #ascii-bg {
@@ -757,5 +759,7 @@ body {
   height: 100vh;
   z-index: -1;
   pointer-events: none;
-  background: var(--black);
+  
+  /* Make the canvas background your original HOT PINK */
+  background: var(--pink);
 }
