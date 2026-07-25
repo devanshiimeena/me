@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ==========================================================
-   CRAYON BLOB IMAGE REVEAL (HERO ONLY)
+   IMAGE REVEAL BACKGROUND (HERO ONLY)
    ========================================================== */
 class RevealBackground {
   constructor(canvasElement, config = {}) {
@@ -201,9 +201,11 @@ class RevealBackground {
     this.ctx = this.canvas.getContext('2d');
     
     this.config = {
+      // Put your image link here! (It won't crash anymore)
       imageSrc: config.imageSrc || "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/e4476503-c1e3-4358-3ff6-539deda1f800/w=800",
-      revealSize: 120,      // Size of the main blob
-      blobCount: 5,         // Number of trailing blobs in the tail
+      revealSize: 120,
+      revealSoftness: 24,
+      blobCount: 5,
       ...config
     };
     
@@ -218,7 +220,6 @@ class RevealBackground {
     this.alive = true;
     this.raf = null;
     this.img = null;
-    this.brush = null;
     this.revealOpacity = 0; 
     
     this.init();
@@ -248,37 +249,6 @@ class RevealBackground {
     }
   }
 
-  // Generate the gritty crayon texture
-  createCrayonBrush() {
-    const radius = this.config.revealSize * (Math.min(window.devicePixelRatio || 1, 2));
-    const c = document.createElement('canvas');
-    c.width = radius * 2;
-    c.height = radius * 2;
-    const ctx = c.getContext('2d');
-    
-    ctx.fillStyle = '#FFFFFF';
-    
-    // Draw 400 textured dots to create the rough crayon edge
-    for (let i = 0; i < 400; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const r = (Math.random() + Math.random()) / 2;
-      const dist = r * radius * 0.95;
-      
-      const px = radius + Math.cos(angle) * dist;
-      const py = radius + Math.sin(angle) * dist;
-      
-      const size = Math.random() * (radius * 0.1) + 1;
-      
-      ctx.globalAlpha = Math.random() * 0.7 + 0.1;
-      ctx.beginPath();
-      ctx.arc(px, py, size, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    
-    this.brush = c;
-    this.brushRadius = radius;
-  }
-
   updatePhysics() {
     if (this.blobs.length === 0) return;
     const { dpr } = this.getSize();
@@ -294,7 +264,6 @@ class RevealBackground {
       this.seeded = true;
     }
     
-    // Physics: The blobs chase the mouse cursor smoothly
     if (this.seeded) {
       this.blobs[0].x += (tx - this.blobs[0].x) * 0.35;
       this.blobs[0].y += (ty - this.blobs[0].y) * 0.35;
@@ -305,12 +274,10 @@ class RevealBackground {
       }
     }
 
-    // Fade logic
     if (this.pointer.inside) {
       this.revealOpacity += (1 - this.revealOpacity) * 0.1;
     } else {
-      // Made it fade out much slower (~1.5 seconds) instead of instantly
-      this.revealOpacity += (0 - this.revealOpacity) * 0.015; 
+      this.revealOpacity += (0 - this.revealOpacity) * 0.05; 
     }
   }
 
@@ -319,8 +286,6 @@ class RevealBackground {
     const { w, h, dpr } = this.getSize();
     this.canvas.width = Math.max(1, Math.round(w * dpr));
     this.canvas.height = Math.max(1, Math.round(h * dpr));
-    
-    this.createCrayonBrush(); 
     
     this.coverRect = this.placeRect(
       this.img.width, this.img.height,
@@ -333,35 +298,35 @@ class RevealBackground {
     
     if (!this.img || this.revealOpacity < 0.01) return;
     
+    const { dpr } = this.getSize();
+    
     this.ensureLayer(this.revealCanvas);
     this.ensureLayer(this.maskCanvas);
     
     const pctx = this.revealCanvas.getContext('2d');
     const mctx = this.maskCanvas.getContext('2d');
     
-    // 1. Draw the image
     pctx.globalCompositeOperation = "source-over";
     pctx.clearRect(0, 0, this.revealCanvas.width, this.revealCanvas.height);
     pctx.drawImage(this.img, this.coverRect.dx, this.coverRect.dy, this.coverRect.dw, this.coverRect.dh);
     
     mctx.clearRect(0, 0, this.maskCanvas.width, this.maskCanvas.height);
+    mctx.save();
+    mctx.filter = `blur(${(this.config.revealSoftness * dpr).toFixed(1)}px)`;
+    mctx.fillStyle = "#FFFFFF";
     
-    // 2. Draw the trailing blobs using the Crayon texture brush
     for (let i = 0; i < this.blobs.length; i++) {
       const t = this.blobs.length <= 1 ? 0 : i / (this.blobs.length - 1);
-      // Make the tail blobs get slightly smaller
-      const scale = 1 - (t * 0.4); 
-      const drawSize = this.brushRadius * scale;
-      
-      mctx.globalAlpha = 1 - (t * 0.5); 
-      mctx.drawImage(this.brush, this.blobs[i].x - drawSize, this.blobs[i].y - drawSize, drawSize * 2, drawSize * 2);
+      const radius = this.config.revealSize * dpr * (1 - t * 0.5);
+      mctx.beginPath();
+      mctx.arc(this.blobs[i].x, this.blobs[i].y, radius, 0, Math.PI * 2);
+      mctx.fill();
     }
+    mctx.restore();
     
-    // 3. Mask the image with the crayon blobs
     pctx.globalCompositeOperation = "destination-in";
     pctx.drawImage(this.maskCanvas, 0, 0);
     
-    // 4. Draw to the screen with our slow fade opacity
     this.ctx.globalAlpha = this.revealOpacity;
     this.ctx.globalCompositeOperation = "source-over";
     this.ctx.drawImage(this.revealCanvas, 0, 0);
@@ -377,7 +342,7 @@ class RevealBackground {
 
   init() {
     this.img = new Image();
-    this.img.src = this.config.imageSrc; 
+    this.img.src = this.config.imageSrc; // No crossOrigin blocks anymore!
     
     this.img.onload = () => {
       if (!this.alive) return;
@@ -388,6 +353,7 @@ class RevealBackground {
     
     window.addEventListener('resize', () => {
       this.resize();
+      this.paint();
     });
     
     const container = this.canvas.parentElement;
