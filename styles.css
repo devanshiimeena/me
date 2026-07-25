@@ -711,3 +711,28 @@ button:focus-visible {
   }
 }
 
+/* ---------- Ink Bleed ---------- */
+
+.ink-bleed{
+    position:relative;
+    display:inline-block;
+    overflow:visible;
+}
+
+.ink-bleed .char{
+    position:relative;
+    display:inline-block;
+}
+
+.ink-bleed .base{
+    position:relative;
+    display:inline-block;
+}
+
+.ink-bleed .blur{
+    position:absolute;
+    inset:0;
+    filter:blur(10px);
+    opacity:0;
+    pointer-events:none;
+}
