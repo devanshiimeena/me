@@ -740,3 +740,22 @@ body, a, button {
      and a glowing pink aura on the black sections! */
   mix-blend-mode: difference;
 }
+
+/* ==========================================================
+   ASCII REVEAL BACKGROUND (APPEND TO BOTTOM)
+   ========================================================== */
+body {
+  background: transparent !important;
+  color: var(--white) !important;
+}
+
+#ascii-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--black);
+}
