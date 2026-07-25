@@ -1,4 +1,4 @@
-/* ==========================================================
+//* ==========================================================
    FONT
    ========================================================== */
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;600;700;800&display=swap');
@@ -129,7 +129,8 @@ a {
   transition: width 0.18s ease;
 }
 
-.site-header__nav a:hover::after {
+.site-header__nav a:hover::after,
+.site-header__nav a.active::after {
   width: 100%;
 }
 
@@ -161,6 +162,13 @@ a {
   padding: 18px var(--edge);
   border-top: 2px solid var(--black);
   font-size: 20px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mobile-menu a.active,
+.mobile-menu a:hover {
+  background: var(--black);
+  color: var(--pink);
 }
 
 /* ==========================================================
@@ -324,13 +332,7 @@ a {
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: -0.01em;
-}
-.work__name {
-  font-size: clamp(24px, 3.4vw, 40px);
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: -0.01em;
-  display: block; /* Added this so the description drops to the next line */
+  display: block;
 }
 
 .work__desc {
@@ -339,8 +341,9 @@ a {
   margin-top: 10px;
   line-height: 1.4;
   opacity: 0.85;
-  text-transform: none;
+  text-transform: none; /* keep normal casing for readability */
 }
+
 .work__meta {
   font-size: 13px;
   font-weight: bold;
@@ -649,6 +652,18 @@ a {
   pointer-events: none;
   -webkit-user-drag: none;
   user-select: none;
+}
+
+/* ==========================================================
+   PARALLAX SECTIONS
+   ========================================================== */
+.parallax-container {
+  position: relative;
+}
+
+.parallax-section {
+  position: relative;
+  background: var(--pink);
 }
 
 /* ==========================================================
