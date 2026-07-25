@@ -742,7 +742,8 @@ button:focus-visible {
 
 .stage {
   position: relative;
-  height: clamp(350px, 45vw, 550px);
+  /* Increased height so the taller photos don't get cut off */
+  height: clamp(450px, 60vw, 700px); 
   width: 100%;
   perspective: 1200px;
   cursor: grab;
@@ -757,15 +758,22 @@ button:focus-visible {
   position: absolute;
   top: 0;
   left: 50%;
-  width: 280px;
-  margin-left: -140px;
+  /* Increased from 280px to 400px */
+  width: 400px; 
+  /* Must always be exactly half of the width (was -140px) */
+  margin-left: -200px; 
   cursor: pointer;
   transform-style: preserve-3d;
   transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
 @media (max-width: 720px) {
-  .slide { width: 200px; margin-left: -100px; }
+  .slide { 
+    /* Increased mobile width from 200px to 260px */
+    width: 260px; 
+    margin-left: -130px; 
+  }
 }
 
 .slide-frame {
