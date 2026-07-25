@@ -706,8 +706,15 @@ button:focus-visible {
 .gallery-section {
   background: var(--pink);
   color: var(--black);
-  padding: clamp(60px, 10vw, 120px) 0;
+  
+  padding-top: clamp(60px, 10vw, 120px);
+  /* Added extra padding on the bottom to perfectly offset the header at the top! */
+  padding-bottom: calc(clamp(60px, 10vw, 120px) + 3.5rem);
+  
+  /* Added a matching black line to the top! */
+  border-top: 3px solid var(--black);
   border-bottom: 3px solid var(--black);
+  
   display: flex;
   flex-direction: column;
   align-items: center;
