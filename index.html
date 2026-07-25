@@ -41,9 +41,25 @@
  
 <!-- HERO -->
 <section class="hero" id="top">
-  <h1 class="hero__headline">
+  <!-- BASE LAYER -->
+  <h1 class="hero__headline" data-layer="base">
     HI, I'M<br>DEVANSHI
   </h1>
+  
+  <!-- REVEAL LAYER 1: Deep distorted glass lens with subtle color -->
+  <div class="reveal-layer reveal-layer-1" aria-hidden="true">
+      <h1 class="hero__headline reveal-text" data-layer="mid">
+          HI, I'M<br>DEVANSHI
+      </h1>
+  </div>
+
+  <!-- REVEAL LAYER 2: Crystal core with heavy chromatic aberration -->
+  <div class="reveal-layer reveal-layer-2" aria-hidden="true">
+      <h1 class="hero__headline reveal-text" data-layer="top">
+          HI, I'M<br>DEVANSHI
+      </h1>
+  </div>
+
   <a href="#manifesto" class="hero__scroll">KEEP SCROLLING ↓</a>
 </section>
   
@@ -109,6 +125,27 @@
   <span>MADE WITH LOVE</span>
   <a href="#top">BACK TO TOP ↑</a>
 </footer>
+
+<!-- Custom Cursor -->
+<div class="custom-cursor"></div>
+
+<!-- SVG Filters for organic liquid mask & displacement -->
+<svg style="position: absolute; width: 0; height: 0;" aria-hidden="true">
+    <defs>
+        <filter id="liquid">
+            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" result="noise" seed="1">
+                <animate attributeName="baseFrequency" values="0.015; 0.02; 0.015" dur="10s" repeatCount="indefinite" />
+            </feTurbulence>
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="35" xChannelSelector="R" yChannelSelector="G" result="displaced" />
+        </filter>
+        <filter id="liquid-intense">
+            <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="3" result="noise" seed="2">
+                <animate attributeName="baseFrequency" values="0.025; 0.035; 0.025" dur="8s" repeatCount="indefinite" />
+            </feTurbulence>
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="50" xChannelSelector="R" yChannelSelector="B" result="displaced" />
+        </filter>
+    </defs>
+</svg>
 
 <script src="script.js"></script>
 </body>
