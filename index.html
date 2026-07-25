@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,78 +20,268 @@
   
 <!-- HEADER / NAV -->
 <header class="site-header">
-  <a href="index.html" class="site-header__mark">D.M.</a>
+  <a href="#top" class="site-header__mark">D.M.</a>
   <nav class="site-header__nav">
-    <a href="about.html">ABOUT</a>
-    <a href="skills.html">SKILLS</a>
-    <a href="work.html">WORK</a>
+    <a href="#about">ABOUT</a>
+    <a href="#skills">SKILLS</a>
+    <a href="#work">WORK</a>
     <a href="blog.html">BLOG</a>
-    <a href="contact.html">SAY HI</a>
+    <a href="#contact">SAY HI</a>
   </nav>
   <button class="menu-toggle" aria-label="toggle menu" aria-expanded="false">MENU</button>
 </header>
  
 <!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu">
-  <a href="about.html">ABOUT</a>
-  <a href="skills.html">SKILLS</a>
-  <a href="work.html">WORK</a>
+  <a href="#about">ABOUT</a>
+  <a href="#skills">SKILLS</a>
+  <a href="#work">WORK</a>
   <a href="blog.html">BLOG</a>
-  <a href="contact.html">SAY HI</a>
+  <a href="#contact">SAY HI</a>
 </div>
  
-<!-- HERO -->
-<section class="hero" id="top">
-  <!-- THE CANVAS IS NOW CORRECTLY TRAPPED INSIDE THE HERO SECTION -->
-  <canvas id="ascii-bg"></canvas>
+<main class="parallax-container">
   
-  <h1 class="hero__headline">
-    HI, I'M<br>DEVANSHI
-  </h1>
-  <a href="#manifesto" class="hero__scroll">KEEP SCROLLING ↓</a>
-</section>
-  
-<!-- STATEMENT STRIP -->
-<section class="strip">
- <p>student · creative · aspiring pilot </p>
-</section>
-  
-<!-- MANIFESTO -->
-<section class="manifesto" id="manifesto">
-  <span class="eyebrow">001 / THE POINT</span>
-  <p class="manifesto__text">
-    i'm glad you found your way here
-  </p>
-  <p class="manifesto__text manifesto__text--right">
-    this is supposed to be an archive of my interests and ambitions or whatever i'm obsessing over at the moment :)
-  </p>
-</section>
+  <!-- ORIGINAL HOME CONTENT -->
+  <section class="parallax-section" id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <!-- THE CANVAS IS NOW CORRECTLY TRAPPED INSIDE THE HERO SECTION -->
+      <canvas id="ascii-bg"></canvas>
+      <h1 class="hero__headline">
+        HI, I'M<br>DEVANSHI
+      </h1>
+      <a href="#manifesto" class="hero__scroll">KEEP SCROLLING ↓</a>
+    </section>
+      
+    <!-- STATEMENT STRIP -->
+    <section class="strip">
+      <p>student · creative · aspiring pilot </p>
+    </section>
+      
+    <!-- MANIFESTO -->
+    <section class="manifesto" id="manifesto">
+      <span class="eyebrow">001 / THE POINT</span>
+      <p class="manifesto__text">
+        i'm glad you found your way here
+      </p>
+      <p class="manifesto__text manifesto__text--right">
+        this is supposed to be an archive of my interests and ambitions or whatever i'm obsessing over at the moment :)
+      </p>
+    </section>
 
-<!-- BIG QUOTE / SIGNATURE MOMENT -->
-<section class="bigline">
-  <p>ANYWAYSSSSSSS<br>HERE'S EVERYTHING</p>
-</section>
+    <!-- BIG QUOTE / SIGNATURE MOMENT -->
+    <section class="bigline">
+      <p>ANYWAYSSSSSSS<br>HERE'S EVERYTHING</p>
+    </section>
+  </section>
 
-<!-- FULL BLEED STATEMENT -->
-<section class="fullbleed">
-  <p>UNBOTHERED.<br>MOISTURIZED.<br>ONLINE.</p>
-</section>
+  <!-- ABOUT SECTION (from about.html) -->
+  <section class="parallax-section" id="about">
+    <section class="hero hero--tall">
+      <h1 class="hero__headline">ABOUT<br>ME.</h1>
+      <p class="hero__sub">the short version, and a slightly longer one.</p>
+    </section>
+    <section class="manifesto">
+      <span class="eyebrow">WHO I AM</span>
+      <p class="manifesto__text">
+        I'm Devanshi - an artist, student, and freelance creative.
+        I work mostly in mixed media and graphics, helping people 
+        put a face to what they do that actually feels like them.
+      </p>
+      <p class="manifesto__text manifesto__text--right">
+        outside of that, I'm working through the theory side of getting my
+        pilot's licence. it's slow, detailed, and a quite thrilling.
+      </p>
+    </section>
+    <section class="strip">
+      <p>ALWAYS MAKING SOMETHING, ALWAYS LEARNING SOMETHING.</p>
+    </section>
+    <section class="facts" id="facts">
+      <span class="eyebrow">THE FACTS</span>
+      <ul class="facts__list">
+        <li>
+          <span class="facts__label">WHAT I DO</span>
+          <span class="facts__value">....</span>
+        </li>
+        <li>
+          <span class="facts__label">WHAT I ENJOY</span>
+          <span class="facts__value">matcha, art, reading, running.</span>
+        </li>
+        <li>
+          <span class="facts__label">WHAT I'M LEARNING</span>
+          <span class="facts__value">aviation theory - working toward my pilot's licence.</span>
+        </li>
+        <li>
+          <span class="facts__label">WHERE TO FIND ME</span>
+          <span class="facts__value">instagram @m.devanshi</span>
+        </li>
+      </ul>
+    </section>
+  </section>
 
-<!-- CONTACT -->
-<section class="contact" id="contact">
-  <span class="eyebrow">003 / SAY SOMETHING</span>
-  <h2 class="contact__headline">TELL US<br>SOMETHING<br>GOOD.</h2>
-  <a href="mailto:devanshimeena@icloud.com" class="contact__button">devanshimeena@icloud.com</a>
-  <a href="https://www.instagram.com/mdevanshii/" target="_blank" rel="noopener noreferrer" class="contact__button">@mdevanshii</a>
-</section>
+  <!-- SKILLS SECTION (from skills.html) -->
+  <section class="parallax-section" id="skills">
+    <section class="hero hero--tall">
+      <h1 class="hero__headline">MY<br>SKILLS.</h1>
+      <p class="hero__sub">a few things I try to keep true.</p>
+    </section>
+    <section class="strip">
+      <p>SLOW WORK, MADE CAREFULLY, MEANT TO LAST.</p>
+    </section>
+    <section class="manifesto">
+      <span class="eyebrow">ON MAKING THINGS</span>
+      <p class="manifesto__text">
+        I don't believe in rushing a piece just to finish it. whether it's a
+        painting, a brand, or an illustration, I'd rather sit with something
+        a little longer and get it right than ship something fast and forgettable.
+      </p>
+      <p class="manifesto__text manifesto__text--right">
+        every project starts as a conversation — I want to understand what
+        you're actually trying to say before I put anything on the page.
+      </p>
+    </section>
+    <section class="bigline">
+      <p>PATIENCE FIRST<br>POLISH SECOND</p>
+    </section>
+    <section class="manifesto">
+      <span class="eyebrow">ON LEARNING</span>
+      <p class="manifesto__text">
+        I'm not precious about being the most experienced person in the room.
+        right now I'm a student in two directions at once - still refining my
+        craft, still working through the theory of flight - and I like it that way.
+      </p>
+      <p class="manifesto__text manifesto__text--right">
+        good work comes from being honest about what you
+        don't know yet, and staying curious enough to find out.
+      </p>
+    </section>
+    <section class="fullbleed">
+      <p>HONEST WORK.<br>KIND PROCESS.<br>NO SHORTCUTS.</p>
+    </section>
+  </section>
 
-<!-- FOOTER -->
-<footer class="site-footer">
-  <span>© 2026 DIVA.</span>
-  <span>MADE WITH LOVE</span>
-  <a href="#top">BACK TO TOP ↑</a>
-</footer>
+  <!-- WORK SECTION (from work.html) -->
+  <section class="parallax-section" id="work">
+    <section class="hero hero--tall">
+      <h1 class="hero__headline">MY<br>WORK.</h1>
+      <p class="hero__sub">a selection of things I've made.</p>
+    </section>
+    <section class="work">
+      <span class="eyebrow">002 / THE STUFF</span>
+      <div class="work__grid">
+        <a href="https://example.com/project1" target="_blank" class="work__item">
+          <span class="work__num">01</span>
+          <div class="work__content">
+            <span class="work__name">PROJECT ALPHA</span>
+            <p class="work__desc">A comprehensive rebrand and digital platform for a boutique sound studio, focusing on minimal aesthetics and brutalist typography.</p>
+          </div>
+          <span class="work__meta">HTML / CSS / JS / THREE.JS</span>
+        </a>
+        <a href="https://example.com/project2" target="_blank" class="work__item">
+          <span class="work__num">02</span>
+          <div class="work__content">
+            <span class="work__name">NIGHT MODE</span>
+            <p class="work__desc">Experimental club visuals and interactive browser experiences built for a late-night music festival.</p>
+          </div>
+          <span class="work__meta">REACT / WEBGL / GLSL</span>
+        </a>
+        <a href="https://example.com/project3" target="_blank" class="work__item">
+          <span class="work__num">03</span>
+          <div class="work__content">
+            <span class="work__name">TYPE ARCHIVE</span>
+            <p class="work__desc">An interactive typography specimen site that allows users to distort and stretch custom variable fonts.</p>
+          </div>
+          <span class="work__meta">VANILLA JS / CSS VARIABLES</span>
+        </a>
+        <a href="https://example.com/project4" target="_blank" class="work__item">
+          <span class="work__num">04</span>
+          <div class="work__content">
+            <span class="work__name">ECHO SYSTEM</span>
+            <p class="work__desc">An audio-reactive visualizer that connects to Spotify and generates real-time abstract art based on frequency data.</p>
+          </div>
+          <span class="work__meta">WEB AUDIO API / CANVAS</span>
+        </a>
+      </div>
+    </section>
+    <section class="gallery-section">
+      <div class="gallery">
+        <div class="gallery__column" data-direction="1">
+          <div class="gallery__item"><img src="https://picsum.photos/seed/devanshi01/600/800" alt="Placeholder 1"></div>
+          <div class="gallery__item"><img src="https://picsum.photos/seed/devanshi02/600/700" alt="Placeholder 2"></div>
+          <div class="gallery__item"><img src="https://picsum.photos/seed/devanshi03/600/900" alt="Placeholder 3"></div>
+        </div>
+        <div class="gallery__column" data-direction="-1">
+          <div class="gallery__item"><img src="https://picsum.photos/seed/devanshi04/600/600" alt="Placeholder 4"></div>
+          <div class="gallery__item"><img src="https://picsum.photos/seed/devanshi05/600/1000" alt="Placeholder 5"></div>
+          <div class="gallery__item"><img src="https://picsum.photos/seed/devanshi06/600/700" alt="Placeholder 6"></div>
+        </div>
+        <div class="gallery__column" data-direction="1.2">
+          <div class="gallery__item"><img src="https://picsum.photos/seed/devanshi07/600/900" alt="Placeholder 7"></div>
+          <div class="gallery__item"><img src="https://picsum.photos/seed/devanshi08/600/600" alt="Placeholder 8"></div>
+          <div class="gallery__item"><img src="https://picsum.photos/seed/devanshi09/600/800" alt="Placeholder 9"></div>
+        </div>
+        <div class="gallery__column" data-direction="-1.2">
+          <div class="gallery__item"><img src="https://picsum.photos/seed/devanshi10/600/1000" alt="Placeholder 10"></div>
+          <div class="gallery__item"><img src="https://picsum.photos/seed/devanshi11/600/700" alt="Placeholder 11"></div>
+          <div class="gallery__item"><img src="https://picsum.photos/seed/devanshi12/600/900" alt="Placeholder 12"></div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- CONTACT SECTION (from contact.html) -->
+  <section class="parallax-section" id="contact">
+    <section class="hero hero--tall">
+      <h1 class="hero__headline">
+        SAY<br>HI.
+      </h1>
+      <p class="hero__sub">for website, branding, illustration, design work, or just to say hello.</p>
+    </section>
+
+    <section class="strip">
+      <p>NO CONTACT FORM — JUST SEND AN EMAIL, I READ THEM ALL.</p>
+    </section>
+
+    <section class="contact">
+      <span class="eyebrow">GET IN TOUCH</span>
+      <h2 class="contact__headline">LET'S WORK<br>TOGETHER.</h2>
+      <a href="mailto:devanshimeena@icloud.com" class="contact__button">devanshimeena@icloud.com</a>
+    </section>
+
+    <section class="facts" id="channels">
+      <span class="eyebrow">OTHER WAYS TO REACH ME</span>
+      <ul class="facts__list">
+        <li>
+          <span class="facts__label">EMAIL</span>
+          <a href="mailto:devanshimeena@icloud.com" class="facts__value">devanshimeena@icloud.com</a>
+        </li>
+        <li>
+          <span class="facts__label">INSTAGRAM</span>
+          <a href="https://www.instagram.com/mdevanshii/" target="_blank" rel="noopener noreferrer" class="facts__value">@mdevanshii</a>
+        </li>
+        <li>
+          <span class="facts__label">LINKEDIN</span>
+          <a href="https://www.linkedin.com/in/devanshi-m-3a375b343/" target="_blank" rel="noopener noreferrer" class="facts__value">Devanshi Meena</a>
+        </li>
+      </ul>
+    </section>
+
+    <section class="bigline">
+      <p>I'LL GET BACK<br>TO YOU SOON.</p>
+    </section>
+
+    <footer class="site-footer">
+      <span>© 2026 DIVA.</span>
+      <span>MADE WITH LOVE</span>
+      <a href="#top">BACK TO TOP ↑</a>
+    </footer>
+  </section>
+
+</main>
 
 <script src="script.js"></script>
+<script src="drag.js"></script>
 </body>
 </html>
+```
