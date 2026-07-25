@@ -701,44 +701,187 @@ button:focus-visible {
 }
 
 /* ==========================================================
-   WORK GALLERY
+   CODEPEN GALLERY ADAPTED (NO ROUND EDGES)
    ========================================================== */
 .gallery-section {
-  background: var(--black);
-  padding: clamp(60px, 10vw, 140px) var(--edge);
+  background: var(--pink);
+  color: var(--black);
+  padding: clamp(60px, 10vw, 120px) 0;
   border-bottom: 3px solid var(--black);
-  overflow: hidden;
-}
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: clamp(10px, 2vw, 24px);
-  align-items: start;
-}
-.gallery__column {
   display: flex;
   flex-direction: column;
-  gap: clamp(10px, 2vw, 24px);
-  will-change: transform;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  user-select: none;
 }
-.gallery__item {
-  width: 100%;
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
 }
-.gallery__item img {
+
+.gallery-header {
+  display: flex;
+  width: min(94vw, 620px);
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  color: var(--black);
+  text-transform: uppercase;
+}
+
+.stage {
+  position: relative;
+  height: clamp(350px, 45vw, 550px);
   width: 100%;
-  height: auto;
-  display: block;
+  perspective: 1200px;
+  cursor: grab;
+}
+
+.stage:active {
+  cursor: grabbing;
+}
+
+.slide {
+  margin: 0;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 280px;
+  margin-left: -140px;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (max-width: 720px) {
+  .slide { width: 200px; margin-left: -100px; }
+}
+
+.slide-frame {
+  aspect-ratio: 3 / 4;
+  border: 3px solid var(--black);
+  background: var(--pink);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+  border-radius: 0; /* No round edges */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.slide.is-current .slide-frame {
+  border-color: var(--black);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+}
+
+.slide img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  display: block;
   filter: grayscale(100%) contrast(1.1);
-  transition: filter 0.3s ease;
+  transition: filter 0.4s ease;
 }
-.gallery__item:hover img {
+
+.slide.is-current img {
   filter: grayscale(0%);
 }
-@media (max-width: 900px) {
-  .gallery {
-    grid-template-columns: repeat(2, 1fr);
-  }
+
+.slide figcaption {
+  margin-top: 16px;
+  font-size: 16px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  color: var(--black);
+  text-transform: uppercase;
+}
+.slide.is-current figcaption {
+  opacity: 1;
+  transform: translateY(0);
+}
+.slide figcaption .title {
+  font-weight: bold;
+}
+.slide figcaption .place {
+  font-size: 13px;
+  font-weight: bold;
+  opacity: 0.8;
+}
+
+.controls {
+  margin-top: 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 8px 14px;
+  background: var(--pink);
+  border: 3px solid var(--black);
+  border-radius: 0; /* No round edges */
+}
+
+.nav-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--black); 
+  background: var(--pink);
+  color: var(--black);
+  cursor: pointer;
+  opacity: 1;
+  border-radius: 0; /* No round edges */
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.nav-btn:hover:not(:disabled) {
+  background: var(--black);
+  color: var(--pink);
+}
+.nav-btn:disabled {
+  cursor: default;
+  opacity: 0.3;
+  border-color: rgba(10, 10, 10, 0.3);
+  color: rgba(10, 10, 10, 0.3);
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dot-btn {
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  height: 16px;
+}
+.dot {
+  display: block;
+  height: 8px;
+  width: 8px;
+  border-radius: 0; /* Square dots! */
+  background: rgba(10, 10, 10, 0.3);
+  transition: width 0.3s ease, background 0.3s ease;
+}
+.dot-btn.is-active .dot {
+  width: 24px;
+  background: var(--black);
 }
 
 /* ==========================================================
