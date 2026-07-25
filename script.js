@@ -177,132 +177,17 @@ magneticElements.forEach((item) => {
 })();
 
 /* ==========================================================
-   HERO REVEAL PHYSICS (APPEND TO BOTTOM)
+   GLOBAL CURSOR TRACKING
    ========================================================== */
 document.addEventListener('DOMContentLoaded', () => {
-    const headlines = document.querySelectorAll('.hero__headline');
-    
-    headlines.forEach(headline => {
-        const walker = document.createTreeWalker(headline, NodeFilter.SHOW_TEXT, null, false);
-        const textNodes = [];
-        while(walker.nextNode()) textNodes.push(walker.currentNode);
-        
-        textNodes.forEach(node => {
-            const text = node.nodeValue;
-            const fragment = document.createDocumentFragment();
-            for (let i = 0; i < text.length; i++) {
-                const char = text[i];
-                if (char.trim() === '') {
-                    fragment.appendChild(document.createTextNode(char));
-                } else {
-                    const span = document.createElement('span');
-                    span.className = 'char';
-                    span.textContent = char;
-                    fragment.appendChild(span);
-                }
-            }
-            node.parentNode.replaceChild(fragment, node);
-        });
-    });
+    // Auto-inject the cursor so you don't have to edit all your HTML pages!
+    const cursorShadow = document.createElement('div');
+    cursorShadow.className = 'cursor-shadow';
+    document.body.appendChild(cursorShadow);
 
-    let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-    let smoothMouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-    let vel = { x: 0, y: 0 };
-    const tension = 0.08;
-    const friction = 0.8;
-
+    // Update CSS variables on mouse move
     window.addEventListener('mousemove', (e) => {
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
+        document.documentElement.style.setProperty('--cursor-x', `${e.clientX}px`);
+        document.documentElement.style.setProperty('--cursor-y', `${e.clientY}px`);
     });
-
-    let chars = [];
-    
-    function initChars() {
-        const charElements = document.querySelectorAll('.char');
-        charElements.forEach(el => el.style.transform = 'none');
-        
-        chars = [];
-        charElements.forEach(charEl => {
-            const rect = charEl.getBoundingClientRect();
-            const headline = charEl.closest('.hero__headline');
-            const layer = headline.dataset.layer || 'base';
-            
-            let strength = 0.15;
-            if (layer === 'mid') strength = 0.35;
-            if (layer === 'top') strength = 0.6;
-            
-            chars.push({
-                el: charEl,
-                originX: rect.left + rect.width / 2,
-                originY: rect.top + rect.height / 2 + window.scrollY,
-                x: 0, 
-                y: 0,
-                velX: 0,
-                velY: 0,
-                strength: strength
-            });
-        });
-    }
-
-    setTimeout(initChars, 100);
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(initChars, 150);
-    });
-
-    const hero = document.querySelector('.hero');
-
-    function animate() {
-        vel.x += (mouse.x - smoothMouse.x) * tension;
-        vel.y += (mouse.y - smoothMouse.y) * tension;
-        vel.x *= friction;
-        vel.y *= friction;
-        smoothMouse.x += vel.x;
-        smoothMouse.y += vel.y;
-
-        if (hero) {
-            const heroRect = hero.getBoundingClientRect();
-            const maskX = smoothMouse.x - heroRect.left;
-            const maskY = smoothMouse.y - heroRect.top;
-            document.documentElement.style.setProperty('--mask-x', `${maskX}px`);
-            document.documentElement.style.setProperty('--mask-y', `${maskY}px`);
-        }
-
-        document.documentElement.style.setProperty('--cursor-x', `${mouse.x}px`);
-        document.documentElement.style.setProperty('--cursor-y', `${mouse.y}px`);
-
-        const docMouseY = smoothMouse.y + window.scrollY;
-        const maxDistance = 300;
-        
-        chars.forEach(char => {
-            const dx = smoothMouse.x - char.originX;
-            const dy = docMouseY - char.originY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            
-            let targetX = 0;
-            let targetY = 0;
-            
-            if (dist < maxDistance) {
-                const pull = Math.pow((maxDistance - dist) / maxDistance, 2); 
-                targetX = dx * pull * char.strength;
-                targetY = dy * pull * char.strength;
-            }
-            
-            char.velX += (targetX - char.x) * 0.15;
-            char.velY += (targetY - char.y) * 0.15;
-            char.velX *= 0.75;
-            char.velY *= 0.75;
-            
-            char.x += char.velX;
-            char.y += char.velY;
-            
-            char.el.style.transform = `translate3d(${char.x}px, ${char.y}px, 0)`;
-        });
-
-        requestAnimationFrame(animate);
-    }
-    
-    animate();
 });
