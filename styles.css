@@ -711,28 +711,86 @@ button:focus-visible {
   }
 }
 
-/* ---------- Ink Bleed ---------- */
-
-.ink-bleed{
-    position:relative;
-    display:inline-block;
-    overflow:visible;
+/* ============================================================
+   INK BLEED — cursor ink/goo effect (ported from the InkBleed
+   React component). Typography is untouched: font, size, weight,
+   letter-spacing, line-height, color, and text-transform all
+   still come from .hero__headline via normal inheritance. These
+   rules only add the layered masking structure the effect needs.
+   ============================================================ */
+.ink-bleed {
+  cursor: default;
+  user-select: none;
 }
 
-.ink-bleed .char{
-    position:relative;
-    display:inline-block;
+.ink-bleed__goo {
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
 }
 
-.ink-bleed .base{
-    position:relative;
-    display:inline-block;
+/* Forces a line break inside the flex row, standing in for the
+   original <br> between "MY" and "WORK." while keeping every
+   character — across both lines — inside one continuous goo filter. */
+.ink-bleed__break {
+  flex-basis: 100%;
+  width: 0;
+  height: 0;
 }
 
-.ink-bleed .blur{
-    position:absolute;
-    inset:0;
-    filter:blur(10px);
-    opacity:0;
-    pointer-events:none;
+.ink-bleed__char {
+  position: relative;
+  display: inline-block;
+  white-space: pre;
+  overflow: visible;
+  cursor: default;
+}
+
+.ink-bleed__layer {
+  display: inline-block;
+  white-space: pre;
+}
+
+.ink-bleed__blur,
+.ink-bleed__choker-left,
+.ink-bleed__choker-right {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(
+    circle calc(35px * var(--spot-on, 0)) at var(--mx, -9999px) var(--my, -9999px),
+    rgba(0, 0, 0, 1) 0%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    circle calc(35px * var(--spot-on, 0)) at var(--mx, -9999px) var(--my, -9999px),
+    rgba(0, 0, 0, 1) 0%,
+    transparent 100%
+  );
+}
+
+.ink-bleed__choker-left {
+  left: -10px; /* LEFT_CHOKER_OFFSET */
+}
+
+.ink-bleed__choker-right {
+  left: 10px; /* RIGHT_CHOKER_OFFSET */
+}
+
+.ink-bleed__blur {
+  filter: blur(10px); /* BLUR_AMOUNT */
+}
+
+.ink-bleed__sharp {
+  -webkit-mask-image: radial-gradient(
+    circle calc(35px * var(--spot-on, 0)) at var(--mx, -9999px) var(--my, -9999px),
+    transparent 0%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  mask-image: radial-gradient(
+    circle calc(35px * var(--spot-on, 0)) at var(--mx, -9999px) var(--my, -9999px),
+    transparent 0%,
+    rgba(0, 0, 0, 1) 100%
+  );
 }
