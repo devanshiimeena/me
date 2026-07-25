@@ -730,8 +730,8 @@ body, a, button {
   width: 10px;
   height: 10px;
   background: var(--pink);
-  box-shadow: 0 0 60px 40px var(--pink);
-  border-radius: 50%;
+  box-shadow: 0 0 40px 20px var(--pink);
+  border-radius: 30%;
   pointer-events: none;
   z-index: 99999;
   transform: translate3d(calc(var(--cursor-x) - 50%), calc(var(--cursor-y) - 50%), 0);
