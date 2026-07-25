@@ -176,3 +176,64 @@ magneticElements.forEach((item) => {
   });
 })();
 
+// --------------------
+// Ink Bleed Setup
+// --------------------
+
+const inkHeadline = document.getElementById("inkHeadline");
+
+if (inkHeadline) {
+
+    const html = inkHeadline.innerHTML;
+
+    inkHeadline.innerHTML = "";
+
+    let insideTag = false;
+    let tag = "";
+
+    for (const char of html) {
+
+        if (char === "<") {
+            insideTag = true;
+            tag += char;
+            continue;
+        }
+
+        if (insideTag) {
+            tag += char;
+
+            if (char === ">") {
+                insideTag = false;
+
+                if (tag.toLowerCase() === "<br>") {
+                    inkHeadline.appendChild(document.createElement("br"));
+                }
+
+                tag = "";
+            }
+
+            continue;
+        }
+
+        if (char === " ") {
+            inkHeadline.appendChild(document.createTextNode(" "));
+            continue;
+        }
+
+        const wrapper = document.createElement("span");
+        wrapper.className = "char";
+
+        const base = document.createElement("span");
+        base.className = "base";
+        base.textContent = char;
+
+        const blur = document.createElement("span");
+        blur.className = "blur";
+        blur.textContent = char;
+
+        wrapper.append(base, blur);
+
+        inkHeadline.appendChild(wrapper);
+    }
+
+}
