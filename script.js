@@ -201,7 +201,7 @@ class RevealBackground {
     this.ctx = this.canvas.getContext('2d');
     
     this.config = {
-      imageSrc: config.imageSrc || "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/e4476503-c1e3-4358-3ff6-539deda1f800/w=800",
+      imageSrc: config.imageSrc || "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2000&auto=format&fit=crop",
       revealSize: 80,       // Size of the crayon brush tip
       stayDuration: 2500,   // How long the stroke stays visible (2.5 seconds)
       fadeDuration: 1000,   // How long it takes to fade out (1 second)
