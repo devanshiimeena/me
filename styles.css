@@ -830,68 +830,42 @@ button:focus-visible {
   opacity: 0.8;
 }
 
-.controls {
-  margin-top: 2rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 8px 14px;
-  background: var(--pink);
-  border: 3px solid var(--black);
-  border-radius: 0; /* No round edges */
-}
-
+/* ==========================================================
+   MINIMALIST SIDE ARROWS
+   ========================================================== */
 .nav-btn {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border: 3px solid var(--black); 
-  background: var(--pink);
-  color: var(--black);
-  cursor: pointer;
-  opacity: 1;
-  border-radius: 0; /* No round edges */
-  transition: background 0.15s ease, color 0.15s ease;
-}
-.nav-btn:hover:not(:disabled) {
-  background: var(--black);
-  color: var(--pink);
-}
-.nav-btn:disabled {
-  cursor: default;
-  opacity: 0.3;
-  border-color: rgba(10, 10, 10, 0.3);
-  color: rgba(10, 10, 10, 0.3);
-}
-
-.dots {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50; /* Keeps buttons clickable above the images */
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-.dot-btn {
+  justify-content: center;
   border: none;
-  padding: 0;
-  cursor: pointer;
   background: transparent;
-  display: grid;
-  place-items: center;
-  height: 16px;
-}
-.dot {
-  display: block;
-  height: 8px;
-  width: 8px;
-  border-radius: 0; /* Square dots! */
-  background: rgba(10, 10, 10, 0.3);
-  transition: width 0.3s ease, background 0.3s ease;
-}
-.dot-btn.is-active .dot {
-  width: 24px;
-  background: var(--black);
+  color: var(--black);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  padding: 10px;
 }
 
+.nav-btn:hover:not(:disabled) {
+  opacity: 0.5; /* Subtle fade on hover */
+}
+
+.nav-btn:disabled {
+  opacity: 0.1;
+  cursor: default;
+}
+
+.prev-btn { left: 4vw; }
+.next-btn { right: 4vw; }
+
+@media (max-width: 720px) {
+  .nav-btn svg { width: 32px; height: 32px; }
+  .prev-btn { left: 1vw; }
+  .next-btn { right: 1vw; }
+}
 /* ==========================================================
    ASCII REVEAL BACKGROUND (HERO ONLY)
    ========================================================== */
