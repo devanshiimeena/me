@@ -191,3 +191,262 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.style.setProperty('--cursor-y', `${e.clientY}px`);
     });
 });
+
+/* ==========================================================
+   ASCII REVEAL BACKGROUND PIPELINE (APPEND TO BOTTOM)
+   ========================================================== */
+class AsciiRevealBackground {
+  constructor(canvasElement, config = {}) {
+    this.canvas = canvasElement;
+    this.ctx = this.canvas.getContext('2d');
+    
+    this.config = {
+      // You can swap this URL with any image you want for the ASCII texture
+      imageSrc: config.imageSrc || "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/e4476503-c1e3-4358-3ff6-539deda1f800/w=800",
+      columns: 200,
+      ramp: " .:-=+*#%@",
+      invert: false,
+      contrast: 100,
+      inkColor: "#FFFFFF",
+      asciiOpacity: 0.15,
+      revealSize: 120,
+      revealSoftness: 24,
+      blobCount: 5,
+      ...config
+    };
+    
+    this.offCanvas = document.createElement('canvas');
+    this.samplerCanvas = document.createElement('canvas');
+    this.revealCanvas = document.createElement('canvas');
+    this.maskCanvas = document.createElement('canvas');
+    
+    this.pointer = { x: -9999, y: -9999, inside: false };
+    this.blobs = Array.from({ length: this.config.blobCount }, () => ({ x: 0, y: 0 }));
+    this.seeded = false;
+    
+    this.coverRect = { dx: 0, dy: 0, dw: 0, dh: 0 };
+    this.alive = true;
+    this.raf = null;
+    this.img = null;
+    
+    this.revealOpacity = 0; // for slow fade back to ASCII
+    
+    this.init();
+  }
+
+  contrastAt(value) {
+    return 0.5 + (value / 100) * 2;
+  }
+
+  getSize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    return { w, h, dpr };
+  }
+
+  placeRect(imgW, imgH, boxW, boxH) {
+    const scale = Math.max(boxW / imgW, boxH / imgH);
+    const dw = imgW * scale;
+    const dh = imgH * scale;
+    const dx = (boxW - dw) / 2;
+    const dy = (boxH - dh) * 0.5; // focusY 50%
+    return { dx, dy, dw, dh };
+  }
+
+  ensureLayer(layer) {
+    if (layer.width !== this.canvas.width || layer.height !== this.canvas.height) {
+      layer.width = this.canvas.width;
+      layer.height = this.canvas.height;
+    }
+  }
+
+  buildAscii() {
+    if (!this.img) return;
+    
+    const { w, h, dpr } = this.getSize();
+    this.canvas.width = Math.max(1, Math.round(w * dpr));
+    this.canvas.height = Math.max(1, Math.round(h * dpr));
+    
+    const cols = Math.max(8, Math.round(this.config.columns));
+    const cellW = (w * dpr) / cols;
+    const fontPx = cellW * 1.7;
+    const cellH = fontPx;
+    const rows = Math.max(1, Math.floor((h * dpr) / cellH));
+    
+    this.samplerCanvas.width = cols;
+    this.samplerCanvas.height = rows;
+    const sctx = this.samplerCanvas.getContext('2d', { willReadFrequently: true });
+    
+    const place = this.placeRect(
+      this.img.width, this.img.height,
+      this.canvas.width, this.canvas.height
+    );
+    
+    sctx.clearRect(0, 0, cols, rows);
+    sctx.drawImage(this.img, place.dx / cellW, place.dy / cellH, place.dw / cellW, place.dh / cellH);
+    
+    let data;
+    try {
+      data = sctx.getImageData(0, 0, cols, rows).data;
+    } catch(e) {
+      console.warn("CORS issue reading image data for ASCII");
+      return;
+    }
+    
+    this.offCanvas.width = this.canvas.width;
+    this.offCanvas.height = this.canvas.height;
+    const octx = this.offCanvas.getContext('2d');
+    
+    octx.clearRect(0, 0, this.offCanvas.width, this.offCanvas.height);
+    octx.font = `${fontPx.toFixed(2)}px ui-monospace, monospace`;
+    octx.textBaseline = "top";
+    
+    const punch = this.contrastAt(this.config.contrast);
+    const last = this.config.ramp.length - 1;
+    
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const i = (r * cols + c) * 4;
+        const rr = data[i];
+        const gg = data[i + 1];
+        const bb = data[i + 2];
+        
+        let lum = (0.299 * rr + 0.587 * gg + 0.114 * bb) / 255;
+        lum = (lum - 0.5) * punch + 0.5;
+        if (this.config.invert) lum = 1 - lum;
+        lum = Math.max(0, Math.min(1, lum));
+        
+        const ch = this.config.ramp[Math.round(lum * last)];
+        if (ch === " ") continue;
+        
+        octx.fillStyle = this.config.inkColor;
+        octx.fillText(ch, c * cellW, r * cellH);
+      }
+    }
+    
+    this.coverRect = place;
+  }
+
+  updatePhysics() {
+    if (this.blobs.length === 0) return;
+    const { dpr } = this.getSize();
+    
+    const tx = this.pointer.x * dpr;
+    const ty = this.pointer.y * dpr;
+    
+    if (!this.seeded && this.pointer.inside) {
+      for (const blob of this.blobs) {
+        blob.x = tx;
+        blob.y = ty;
+      }
+      this.seeded = true;
+    }
+    
+    if (this.seeded) {
+      this.blobs[0].x += (tx - this.blobs[0].x) * 0.35;
+      this.blobs[0].y += (ty - this.blobs[0].y) * 0.35;
+      
+      for (let i = 1; i < this.blobs.length; i++) {
+        this.blobs[i].x += (this.blobs[i-1].x - this.blobs[i].x) * 0.35;
+        this.blobs[i].y += (this.blobs[i-1].y - this.blobs[i].y) * 0.35;
+      }
+    }
+
+    if (this.pointer.inside) {
+      this.revealOpacity += (1 - this.revealOpacity) * 0.1;
+    } else {
+      this.revealOpacity += (0 - this.revealOpacity) * 0.05;
+    }
+  }
+
+  paint() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    this.ctx.globalAlpha = this.config.asciiOpacity;
+    this.ctx.drawImage(this.offCanvas, 0, 0);
+    this.ctx.globalAlpha = 1.0;
+    
+    if (!this.img || this.revealOpacity < 0.01) return;
+    
+    const { dpr } = this.getSize();
+    
+    this.ensureLayer(this.revealCanvas);
+    this.ensureLayer(this.maskCanvas);
+    
+    const pctx = this.revealCanvas.getContext('2d');
+    const mctx = this.maskCanvas.getContext('2d');
+    
+    pctx.globalCompositeOperation = "source-over";
+    pctx.clearRect(0, 0, this.revealCanvas.width, this.revealCanvas.height);
+    pctx.drawImage(this.img, this.coverRect.dx, this.coverRect.dy, this.coverRect.dw, this.coverRect.dh);
+    
+    mctx.clearRect(0, 0, this.maskCanvas.width, this.maskCanvas.height);
+    mctx.save();
+    mctx.filter = `blur(${(this.config.revealSoftness * dpr).toFixed(1)}px)`;
+    mctx.fillStyle = "#FFFFFF";
+    
+    for (let i = 0; i < this.blobs.length; i++) {
+      const t = this.blobs.length <= 1 ? 0 : i / (this.blobs.length - 1);
+      const radius = this.config.revealSize * dpr * (1 - t * 0.5);
+      mctx.beginPath();
+      mctx.arc(this.blobs[i].x, this.blobs[i].y, radius, 0, Math.PI * 2);
+      mctx.fill();
+    }
+    mctx.restore();
+    
+    pctx.globalCompositeOperation = "destination-in";
+    pctx.drawImage(this.maskCanvas, 0, 0);
+    
+    this.ctx.globalAlpha = this.revealOpacity;
+    this.ctx.globalCompositeOperation = "source-over";
+    this.ctx.drawImage(this.revealCanvas, 0, 0);
+    this.ctx.globalAlpha = 1.0;
+  }
+
+  loop = () => {
+    if (!this.alive) return;
+    this.updatePhysics();
+    this.paint();
+    this.raf = requestAnimationFrame(this.loop);
+  }
+
+  init() {
+    this.img = new Image();
+    this.img.crossOrigin = "anonymous";
+    this.img.src = this.config.imageSrc;
+    
+    this.img.onload = () => {
+      if (!this.alive) return;
+      this.buildAscii();
+      this.paint();
+      this.raf = requestAnimationFrame(this.loop);
+    };
+    
+    window.addEventListener('resize', () => {
+      this.buildAscii();
+      this.paint();
+    });
+    
+    window.addEventListener('mousemove', (e) => {
+      this.pointer.x = e.clientX;
+      this.pointer.y = e.clientY;
+      this.pointer.inside = true;
+    });
+    
+    window.addEventListener('mouseout', (e) => {
+      if (e.relatedTarget === null) {
+        this.pointer.inside = false;
+        this.seeded = false;
+      }
+    });
+  }
+}
+
+// Automatically start the effect when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('ascii-bg');
+  if (canvas) {
+    new AsciiRevealBackground(canvas);
+  }
+});
