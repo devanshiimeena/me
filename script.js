@@ -150,88 +150,168 @@ magneticElements.forEach((item) => {
 })();
 
 /* ==========================================================
-   HORIZONTAL SCALING CAROUSEL LOGIC
+   CODEPEN 3D CAROUSEL LOGIC
    ========================================================== */
 (function() {
-  const track = document.getElementById("carouselTrack");
-  if (!track) return;
+  const stage = document.getElementById("stage");
+  if (!stage) return;
+  const dotsContainer = document.getElementById("dots");
+  const liveRegion = document.getElementById("live-region");
+  const frameLabel = document.getElementById("frame-label");
+  const frameCount = document.getElementById("frame-count");
+  const prevBtn = document.getElementById("prev-btn");
+  const nextBtn = document.getElementById("next-btn");
 
-  const originalItems = Array.from(track.querySelectorAll(".carousel-item"));
-  if (originalItems.length === 0) return;
+  const photos = [
+    { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/e60dd7f7-a44f-40a7-df62-095b19cd8700/w=800", title: "WORK 01", place: "BRANDING", no: "01" },
+    { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/eec164e9-23f8-4f87-b48a-a208fa806100/w=800", title: "WORK 02", place: "ILLUSTRATION", no: "02" },
+    { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/859c75ea-953e-489e-be61-91a03a35d700/w=800", title: "WORK 03", place: "DESIGN", no: "03" },
+    { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/933a7615-f4b6-4eae-8ed1-705fa0e24400/w=800", title: "WORK 04", place: "UI/UX", no: "04" },
+    { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/7d4d2641-d6a8-4fef-e85c-b12ed100d500/w=800", title: "WORK 05", place: "WEB", no: "05" },
+    { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/ed7b1c40-3332-43d8-a9eb-4615ef341b00/w=800", title: "WORK 06", place: "PRINT", no: "06" },
+    { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/31afae9c-5ba3-4ec3-2534-ed8198ed1100/w=800", title: "WORK 07", place: "3D", no: "07" },
+    { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/bd541261-75be-469c-7dc0-dae0ce81c400/w=800", title: "WORK 08", place: "CONCEPT", no: "08" },
+  ];
 
-  // Clone the images twice so they loop infinitely and seamlessly
-  originalItems.forEach(item => track.appendChild(item.cloneNode(true)));
-  originalItems.forEach(item => track.appendChild(item.cloneNode(true)));
+  let current = 2;
+  const drag = { startX: 0, dragging: false };
 
-  const allItems = Array.from(track.querySelectorAll(".carousel-item"));
-  let currentX = 0;
-  const speed = 1.2; // You can adjust this to make it pan faster or slower!
-
-  function animateCarousel() {
-    currentX -= speed;
-
-    // Measure the exact width of a single set of images to loop seamlessly
-    const itemWidth = originalItems[0].offsetWidth;
-    const gap = parseFloat(window.getComputedStyle(track).gap) || 0;
-    const singleSetWidth = (itemWidth + gap) * originalItems.length;
-
-    // Snap back instantly when we reach the end of the first set
-    if (Math.abs(currentX) >= singleSetWidth) {
-      currentX += singleSetWidth;
-    }
-
-    track.style.transform = `translate3d(${currentX}px, 0, 0)`;
-
-    // Calculate scaling logic based on screen center
-    const viewportCenter = window.innerWidth / 2;
-    
-    allItems.forEach(item => {
-      const rect = item.getBoundingClientRect();
-      const itemCenter = rect.left + rect.width / 2;
-      const distanceFromCenter = Math.abs(viewportCenter - itemCenter);
-      
-      const maxDistance = window.innerWidth / 1.5; 
-      
-      // Images grow to 1.15 scale when in the middle, and shrink to 0.85 when on the sides
-      let scale = 1.15 - (distanceFromCenter / maxDistance) * 0.35;
-      scale = Math.max(0.85, Math.min(1.15, scale));
-      
-      // Images fade out slightly on the edges for a cinematic vignette effect
-      let opacity = 1 - (distanceFromCenter / maxDistance) * 0.5;
-      opacity = Math.max(0.3, Math.min(1, opacity));
-
-      item.style.transform = `scale(${scale})`;
-      item.style.opacity = opacity;
-    });
-
-    requestAnimationFrame(animateCarousel);
+  function clampIndex(i) {
+    return Math.min(photos.length - 1, Math.max(0, i));
   }
 
-  // Kick off the loop
-  requestAnimationFrame(animateCarousel);
-})();
+  function buildSlides() {
+    photos.forEach((photo, i) => {
+      const slide = document.createElement("figure");
+      slide.className = "slide";
+      slide.dataset.index = i;
+      slide.setAttribute("role", "group");
+      slide.setAttribute("aria-roledescription", "slide");
+      slide.setAttribute("aria-label", `${i + 1} of ${photos.length}: ${photo.title}, ${photo.place}`);
+      slide.tabIndex = -1;
 
-  // We only want the effect to run on desktop, or we can run it everywhere. Let run it everywhere but subtly.
-  window.addEventListener("scroll", () => {
-    // Check if gallery is in viewport
-    const rect = gallery.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
+      const frame = document.createElement("div");
+      frame.className = "slide-frame";
+
+      const img = document.createElement("img");
+      img.src = photo.src;
+      img.alt = photo.title;
+      img.draggable = false;
+      img.loading = "lazy";
+
+      frame.appendChild(img);
+
+      const caption = document.createElement("figcaption");
+      caption.innerHTML = `<span class="title">${photo.title}</span><br><span class="place">${photo.place}</span>`;
+
+      slide.appendChild(frame);
+      slide.appendChild(caption);
+
+      slide.addEventListener("click", () => goTo(i));
+
+      stage.appendChild(slide);
+    });
+  }
+
+  function buildDots() {
+    photos.forEach((photo, i) => {
+      const btn = document.createElement("button");
+      btn.className = "dot-btn";
+      btn.setAttribute("role", "tab");
+      btn.setAttribute("aria-label", `Go to ${photo.title}`);
+      btn.dataset.index = i;
+
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      btn.appendChild(dot);
+
+      btn.addEventListener("click", () => goTo(i));
+
+      dotsContainer.appendChild(btn);
+    });
+  }
+
+  function render() {
+    const CARD_WIDTH = window.innerWidth <= 720 ? 200 : 280;
     
-    if (rect.top <= viewportHeight && rect.bottom >= 0) {
-      // Calculate scroll progress through the section
-      const progress = (viewportHeight - rect.top) / (viewportHeight + rect.height);
-      
-      columns.forEach(col => {
-        const direction = parseFloat(col.getAttribute("data-direction") || "1");
-        // Move columns based on direction and scroll progress
-        // When progress goes from 0 to 1, we want translation to go from -150px to 150px approx
-        const yOffset = (progress - 0.5) * 300 * direction; 
-        col.style.transform = `translate3d(0, ${yOffset}px, 0)`;
-      });
-    }
-  });
-})();
+    const slides = stage.querySelectorAll(".slide");
+    slides.forEach((slide) => {
+      const i = Number(slide.dataset.index);
+      const offset = i - current;
+      const isCurrent = offset === 0;
+      const distance = Math.abs(offset);
+      const sign = Math.sign(offset);
+      const visible = distance <= 4;
 
+      const x = sign * (CARD_WIDTH * 0.62 + Math.min(distance, 3) * 14);
+      const rotateY = sign * -42;
+      const scale = isCurrent ? 1 : 1 - Math.min(distance, 3) * 0.08;
+
+      slide.style.transform = `translateX(${x}px) rotateY(${rotateY}deg) scale(${scale})`;
+      slide.style.opacity = visible ? "1" : "0";
+      slide.style.zIndex = 10 - distance;
+      slide.style.pointerEvents = visible ? "auto" : "none";
+      slide.classList.toggle("is-current", isCurrent);
+      slide.setAttribute("aria-current", isCurrent);
+      slide.tabIndex = isCurrent ? 0 : -1;
+    });
+
+    dotsContainer.querySelectorAll(".dot-btn").forEach((btn) => {
+      const i = Number(btn.dataset.index);
+      const isCurrent = i === current;
+      btn.classList.toggle("is-active", isCurrent);
+      btn.setAttribute("aria-selected", isCurrent);
+    });
+
+    const photo = photos[current];
+    frameLabel.textContent = `FRAME ${photo.no}`;
+    frameCount.textContent = `${String(current + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
+    liveRegion.textContent = `Frame ${current + 1} of ${photos.length}, ${photo.title}, ${photo.place}`;
+
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === photos.length - 1;
+  }
+
+  function goTo(i) {
+    current = clampIndex(i);
+    render();
+  }
+
+  function prev() {
+    goTo(current - 1);
+  }
+
+  function next() {
+    goTo(current + 1);
+  }
+
+  prevBtn.addEventListener("click", prev);
+  nextBtn.addEventListener("click", next);
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") prev();
+    if (e.key === "ArrowRight") next();
+  });
+
+  stage.addEventListener("pointerdown", (e) => {
+    drag.startX = e.clientX;
+    drag.dragging = true;
+  });
+
+  stage.addEventListener("pointerup", (e) => {
+    if (!drag.dragging) return;
+    const delta = e.clientX - drag.startX;
+    if (delta > 40) prev();
+    else if (delta < -40) next();
+    drag.dragging = false;
+  });
+
+  window.addEventListener("resize", render);
+
+  buildSlides();
+  buildDots();
+  render();
+})();
 /* ==========================================================
    GLOBAL CURSOR TRACKING
    ========================================================== */
