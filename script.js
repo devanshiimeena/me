@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ==========================================================
-   CRAYON IMAGE REVEAL (HERO ONLY)
+   CRAYON BLOB IMAGE REVEAL (HERO ONLY)
    ========================================================== */
 class RevealBackground {
   constructor(canvasElement, config = {}) {
@@ -201,23 +201,25 @@ class RevealBackground {
     this.ctx = this.canvas.getContext('2d');
     
     this.config = {
-      imageSrc: config.imageSrc || "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2000&auto=format&fit=crop",
-      revealSize: 80,       // Size of the crayon brush tip
-      stayDuration: 2500,   // How long the stroke stays visible (2.5 seconds)
-      fadeDuration: 1000,   // How long it takes to fade out (1 second)
+      imageSrc: config.imageSrc || "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/e4476503-c1e3-4358-3ff6-539deda1f800/w=800",
+      revealSize: 120,      // Size of the main blob
+      blobCount: 5,         // Number of trailing blobs in the tail
       ...config
     };
     
     this.revealCanvas = document.createElement('canvas');
     this.maskCanvas = document.createElement('canvas');
     
-    this.strokes = [];
-    this.lastPoint = null;
+    this.pointer = { x: -9999, y: -9999, inside: false };
+    this.blobs = Array.from({ length: this.config.blobCount }, () => ({ x: 0, y: 0 }));
+    this.seeded = false;
     
     this.coverRect = { dx: 0, dy: 0, dw: 0, dh: 0 };
     this.alive = true;
+    this.raf = null;
     this.img = null;
     this.brush = null;
+    this.revealOpacity = 0; 
     
     this.init();
   }
@@ -246,7 +248,7 @@ class RevealBackground {
     }
   }
 
-  // Generates a custom gritty crayon texture for the brush tip
+  // Generate the gritty crayon texture
   createCrayonBrush() {
     const radius = this.config.revealSize * (Math.min(window.devicePixelRatio || 1, 2));
     const c = document.createElement('canvas');
@@ -256,10 +258,10 @@ class RevealBackground {
     
     ctx.fillStyle = '#FFFFFF';
     
-    // Draw 400 random gritty particles to form the crayon stamp
+    // Draw 400 textured dots to create the rough crayon edge
     for (let i = 0; i < 400; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const r = (Math.random() + Math.random()) / 2; // Bias towards center
+      const r = (Math.random() + Math.random()) / 2;
       const dist = r * radius * 0.95;
       
       const px = radius + Math.cos(angle) * dist;
@@ -277,30 +279,39 @@ class RevealBackground {
     this.brushRadius = radius;
   }
 
-  addStroke(tx, ty) {
-    const now = Date.now();
+  updatePhysics() {
+    if (this.blobs.length === 0) return;
+    const { dpr } = this.getSize();
     
-    // Interpolate points between fast mouse movements so the line doesn't break
-    if (this.lastPoint) {
-      const dx = tx - this.lastPoint.x;
-      const dy = ty - this.lastPoint.y;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      const step = (this.config.revealSize * 0.15); // Stamp every 15% of brush size
-      
-      if (dist > step) {
-        const count = Math.floor(dist / step);
-        for (let i = 1; i <= count; i++) {
-          this.strokes.push({
-            x: this.lastPoint.x + dx * (i / count),
-            y: this.lastPoint.y + dy * (i / count),
-            birth: now
-          });
-        }
+    const tx = this.pointer.x * dpr;
+    const ty = this.pointer.y * dpr;
+    
+    if (!this.seeded && this.pointer.inside) {
+      for (const blob of this.blobs) {
+        blob.x = tx;
+        blob.y = ty;
       }
+      this.seeded = true;
     }
     
-    this.strokes.push({ x: tx, y: ty, birth: now });
-    this.lastPoint = { x: tx, y: ty };
+    // Physics: The blobs chase the mouse cursor smoothly
+    if (this.seeded) {
+      this.blobs[0].x += (tx - this.blobs[0].x) * 0.35;
+      this.blobs[0].y += (ty - this.blobs[0].y) * 0.35;
+      
+      for (let i = 1; i < this.blobs.length; i++) {
+        this.blobs[i].x += (this.blobs[i-1].x - this.blobs[i].x) * 0.35;
+        this.blobs[i].y += (this.blobs[i-1].y - this.blobs[i].y) * 0.35;
+      }
+    }
+
+    // Fade logic
+    if (this.pointer.inside) {
+      this.revealOpacity += (1 - this.revealOpacity) * 0.1;
+    } else {
+      // Made it fade out much slower (~1.5 seconds) instead of instantly
+      this.revealOpacity += (0 - this.revealOpacity) * 0.015; 
+    }
   }
 
   resize() {
@@ -320,54 +331,48 @@ class RevealBackground {
   paint() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     
-    if (!this.img || this.strokes.length === 0) return;
+    if (!this.img || this.revealOpacity < 0.01) return;
     
-    const now = Date.now();
-    const maxAge = this.config.stayDuration + this.config.fadeDuration;
-    
-    // Garbage collect strokes that have fully faded away
-    this.strokes = this.strokes.filter(s => (now - s.birth) < maxAge);
-    
-    if (this.strokes.length === 0) return;
-
     this.ensureLayer(this.revealCanvas);
     this.ensureLayer(this.maskCanvas);
     
     const pctx = this.revealCanvas.getContext('2d');
     const mctx = this.maskCanvas.getContext('2d');
     
+    // 1. Draw the image
     pctx.globalCompositeOperation = "source-over";
     pctx.clearRect(0, 0, this.revealCanvas.width, this.revealCanvas.height);
     pctx.drawImage(this.img, this.coverRect.dx, this.coverRect.dy, this.coverRect.dw, this.coverRect.dh);
     
     mctx.clearRect(0, 0, this.maskCanvas.width, this.maskCanvas.height);
     
-    // Draw all active crayon strokes
-    for (const s of this.strokes) {
-      const age = now - s.birth;
-      let alpha = 1;
+    // 2. Draw the trailing blobs using the Crayon texture brush
+    for (let i = 0; i < this.blobs.length; i++) {
+      const t = this.blobs.length <= 1 ? 0 : i / (this.blobs.length - 1);
+      // Make the tail blobs get slightly smaller
+      const scale = 1 - (t * 0.4); 
+      const drawSize = this.brushRadius * scale;
       
-      // If it's older than stayDuration, start fading it out
-      if (age > this.config.stayDuration) {
-        alpha = 1 - ((age - this.config.stayDuration) / this.config.fadeDuration);
-      }
-      
-      mctx.globalAlpha = Math.max(0, alpha);
-      mctx.drawImage(this.brush, s.x - this.brushRadius, s.y - this.brushRadius);
+      mctx.globalAlpha = 1 - (t * 0.5); 
+      mctx.drawImage(this.brush, this.blobs[i].x - drawSize, this.blobs[i].y - drawSize, drawSize * 2, drawSize * 2);
     }
     
+    // 3. Mask the image with the crayon blobs
     pctx.globalCompositeOperation = "destination-in";
     pctx.drawImage(this.maskCanvas, 0, 0);
     
-    this.ctx.globalAlpha = 1.0;
+    // 4. Draw to the screen with our slow fade opacity
+    this.ctx.globalAlpha = this.revealOpacity;
     this.ctx.globalCompositeOperation = "source-over";
     this.ctx.drawImage(this.revealCanvas, 0, 0);
+    this.ctx.globalAlpha = 1.0;
   }
 
   loop = () => {
     if (!this.alive) return;
+    this.updatePhysics();
     this.paint();
-    requestAnimationFrame(this.loop);
+    this.raf = requestAnimationFrame(this.loop);
   }
 
   init() {
@@ -378,7 +383,7 @@ class RevealBackground {
       if (!this.alive) return;
       this.resize();
       this.paint();
-      requestAnimationFrame(this.loop);
+      this.raf = requestAnimationFrame(this.loop);
     };
     
     window.addEventListener('resize', () => {
@@ -389,15 +394,15 @@ class RevealBackground {
     
     container.addEventListener('mousemove', (e) => {
       const rect = container.getBoundingClientRect();
-      const { dpr } = this.getSize();
-      const tx = (e.clientX - rect.left) * dpr;
-      const ty = (e.clientY - rect.top) * dpr;
-      this.addStroke(tx, ty);
+      this.pointer.x = e.clientX - rect.left;
+      this.pointer.y = e.clientY - rect.top;
+      this.pointer.inside = true;
     });
     
     container.addEventListener('mouseout', (e) => {
       if (!container.contains(e.relatedTarget)) {
-        this.lastPoint = null; // Lift the crayon off the page when mouse leaves
+        this.pointer.inside = false;
+        this.seeded = false;
       }
     });
   }
