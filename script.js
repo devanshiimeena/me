@@ -247,7 +247,8 @@ magneticElements.forEach((item) => {
       const rotateY = sign * -42;
       const scale = isCurrent ? 1 : 1 - Math.min(distance, 3) * 0.08;
 
-      slide.style.transform = `translateX(${x}px) rotateY(${rotateY}deg) scale(${scale})`;
+            // We added translate(-50%, -50%) to perfectly lock the image in the dead-center vertically and horizontally!
+      slide.style.transform = `translate(-50%, -50%) translateX(${x}px) rotateY(${rotateY}deg) scale(${scale})`;
       slide.style.opacity = visible ? "1" : "0";
       slide.style.zIndex = 10 - distance;
       slide.style.pointerEvents = visible ? "auto" : "none";
