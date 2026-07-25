@@ -727,20 +727,16 @@ body, a, button {
   position: fixed;
   top: 0;
   left: 0;
-  width: 14px;
-  height: 14px;
-  
-  /* The core is pink, which turns BLACK when difference-blended over your pink background */
-  background: var(--pink); 
-  
-  /* The aura is black, which leaves the pink background looking perfectly HOT PINK */
-  box-shadow: 0 0 60px 40px var(--black);
-  
+  width: 10px;
+  height: 10px;
+  background: var(--pink);
+  box-shadow: 0 0 60px 40px var(--pink);
   border-radius: 50%;
   pointer-events: none;
   z-index: 99999;
   transform: translate3d(calc(var(--cursor-x) - 50%), calc(var(--cursor-y) - 50%), 0);
   
-  /* Keeps the awesome inverting interaction */
+  /* This blend mode makes it a dark shadow on the pink background, 
+     and a glowing pink aura on the black sections! */
   mix-blend-mode: difference;
 }
