@@ -238,10 +238,11 @@ class AsciiRevealBackground {
     return 0.5 + (value / 100) * 2;
   }
 
-  getSize() {
+    getSize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+    // Measure the actual parent container (the hero section) instead of the whole window
+    const w = this.canvas.parentElement.clientWidth;
+    const h = this.canvas.parentElement.clientHeight;
     return { w, h, dpr };
   }
 
@@ -411,7 +412,7 @@ class AsciiRevealBackground {
     this.raf = requestAnimationFrame(this.loop);
   }
 
-  init() {
+    init() {
     this.img = new Image();
     this.img.crossOrigin = "anonymous";
     this.img.src = this.config.imageSrc;
@@ -428,20 +429,24 @@ class AsciiRevealBackground {
       this.paint();
     });
     
-    window.addEventListener('mousemove', (e) => {
-      this.pointer.x = e.clientX;
-      this.pointer.y = e.clientY;
+    // Listen for mouse movement specifically over the hero container
+    const container = this.canvas.parentElement;
+    
+    container.addEventListener('mousemove', (e) => {
+      const rect = container.getBoundingClientRect();
+      this.pointer.x = e.clientX - rect.left;
+      this.pointer.y = e.clientY - rect.top;
       this.pointer.inside = true;
     });
     
-    window.addEventListener('mouseout', (e) => {
-      if (e.relatedTarget === null) {
+    container.addEventListener('mouseout', (e) => {
+      // Only fade out if the mouse actually leaves the hero section
+      if (!container.contains(e.relatedTarget)) {
         this.pointer.inside = false;
         this.seeded = false;
       }
     });
   }
-}
 
 // Automatically start the effect when the page loads
 document.addEventListener('DOMContentLoaded', () => {
