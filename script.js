@@ -193,30 +193,22 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ==========================================================
-   ASCII REVEAL BACKGROUND PIPELINE (APPEND TO BOTTOM)
+   IMAGE REVEAL BACKGROUND (HERO ONLY)
    ========================================================== */
-class AsciiRevealBackground {
+class RevealBackground {
   constructor(canvasElement, config = {}) {
     this.canvas = canvasElement;
     this.ctx = this.canvas.getContext('2d');
     
     this.config = {
-      // You can swap this URL with any image you want for the ASCII texture
+      // 1. Put your image link here! (It won't crash anymore)
       imageSrc: config.imageSrc || "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/e4476503-c1e3-4358-3ff6-539deda1f800/w=800",
-      columns: 200,
-      ramp: " .:-=+*#%@",
-      invert: false,
-      contrast: 100,
-      inkColor: "#FFFFFF",
-      asciiOpacity: 0,
       revealSize: 120,
       revealSoftness: 24,
       blobCount: 5,
       ...config
     };
     
-    this.offCanvas = document.createElement('canvas');
-    this.samplerCanvas = document.createElement('canvas');
     this.revealCanvas = document.createElement('canvas');
     this.maskCanvas = document.createElement('canvas');
     
@@ -228,21 +220,16 @@ class AsciiRevealBackground {
     this.alive = true;
     this.raf = null;
     this.img = null;
-    
-    this.revealOpacity = 0; // for slow fade back to ASCII
+    this.revealOpacity = 0; 
     
     this.init();
   }
 
-  contrastAt(value) {
-    return 0.5 + (value / 100) * 2;
-  }
-
-    getSize() {
+  getSize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    // Measure the actual parent container (the hero section) instead of the whole window
-    const w = this.canvas.parentElement.clientWidth;
-    const h = this.canvas.parentElement.clientHeight;
+    const container = this.canvas.parentElement;
+    const w = container.clientWidth;
+    const h = container.clientHeight;
     return { w, h, dpr };
   }
 
@@ -251,7 +238,7 @@ class AsciiRevealBackground {
     const dw = imgW * scale;
     const dh = imgH * scale;
     const dx = (boxW - dw) / 2;
-    const dy = (boxH - dh) * 0.5; // focusY 50%
+    const dy = (boxH - dh) * 0.5; 
     return { dx, dy, dw, dh };
   }
 
@@ -260,73 +247,6 @@ class AsciiRevealBackground {
       layer.width = this.canvas.width;
       layer.height = this.canvas.height;
     }
-  }
-
-  buildAscii() {
-    if (!this.img) return;
-    
-    const { w, h, dpr } = this.getSize();
-    this.canvas.width = Math.max(1, Math.round(w * dpr));
-    this.canvas.height = Math.max(1, Math.round(h * dpr));
-    
-    const cols = Math.max(8, Math.round(this.config.columns));
-    const cellW = (w * dpr) / cols;
-    const fontPx = cellW * 1.7;
-    const cellH = fontPx;
-    const rows = Math.max(1, Math.floor((h * dpr) / cellH));
-    
-    this.samplerCanvas.width = cols;
-    this.samplerCanvas.height = rows;
-    const sctx = this.samplerCanvas.getContext('2d', { willReadFrequently: true });
-    
-    const place = this.placeRect(
-      this.img.width, this.img.height,
-      this.canvas.width, this.canvas.height
-    );
-    
-    sctx.clearRect(0, 0, cols, rows);
-    sctx.drawImage(this.img, place.dx / cellW, place.dy / cellH, place.dw / cellW, place.dh / cellH);
-    
-    let data;
-    try {
-      data = sctx.getImageData(0, 0, cols, rows).data;
-    } catch(e) {
-      console.warn("CORS issue reading image data for ASCII");
-      return;
-    }
-    
-    this.offCanvas.width = this.canvas.width;
-    this.offCanvas.height = this.canvas.height;
-    const octx = this.offCanvas.getContext('2d');
-    
-    octx.clearRect(0, 0, this.offCanvas.width, this.offCanvas.height);
-    octx.font = `${fontPx.toFixed(2)}px ui-monospace, monospace`;
-    octx.textBaseline = "top";
-    
-    const punch = this.contrastAt(this.config.contrast);
-    const last = this.config.ramp.length - 1;
-    
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const i = (r * cols + c) * 4;
-        const rr = data[i];
-        const gg = data[i + 1];
-        const bb = data[i + 2];
-        
-        let lum = (0.299 * rr + 0.587 * gg + 0.114 * bb) / 255;
-        lum = (lum - 0.5) * punch + 0.5;
-        if (this.config.invert) lum = 1 - lum;
-        lum = Math.max(0, Math.min(1, lum));
-        
-        const ch = this.config.ramp[Math.round(lum * last)];
-        if (ch === " ") continue;
-        
-        octx.fillStyle = this.config.inkColor;
-        octx.fillText(ch, c * cellW, r * cellH);
-      }
-    }
-    
-    this.coverRect = place;
   }
 
   updatePhysics() {
@@ -357,16 +277,24 @@ class AsciiRevealBackground {
     if (this.pointer.inside) {
       this.revealOpacity += (1 - this.revealOpacity) * 0.1;
     } else {
-      this.revealOpacity += (0 - this.revealOpacity) * 0.05;
+      this.revealOpacity += (0 - this.revealOpacity) * 0.05; 
     }
+  }
+
+  resize() {
+    if (!this.img) return;
+    const { w, h, dpr } = this.getSize();
+    this.canvas.width = Math.max(1, Math.round(w * dpr));
+    this.canvas.height = Math.max(1, Math.round(h * dpr));
+    
+    this.coverRect = this.placeRect(
+      this.img.width, this.img.height,
+      this.canvas.width, this.canvas.height
+    );
   }
 
   paint() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    
-    this.ctx.globalAlpha = this.config.asciiOpacity;
-    this.ctx.drawImage(this.offCanvas, 0, 0);
-    this.ctx.globalAlpha = 1.0;
     
     if (!this.img || this.revealOpacity < 0.01) return;
     
@@ -392,66 +320,3 @@ class AsciiRevealBackground {
       const radius = this.config.revealSize * dpr * (1 - t * 0.5);
       mctx.beginPath();
       mctx.arc(this.blobs[i].x, this.blobs[i].y, radius, 0, Math.PI * 2);
-      mctx.fill();
-    }
-    mctx.restore();
-    
-    pctx.globalCompositeOperation = "destination-in";
-    pctx.drawImage(this.maskCanvas, 0, 0);
-    
-    this.ctx.globalAlpha = this.revealOpacity;
-    this.ctx.globalCompositeOperation = "source-over";
-    this.ctx.drawImage(this.revealCanvas, 0, 0);
-    this.ctx.globalAlpha = 1.0;
-  }
-
-  loop = () => {
-    if (!this.alive) return;
-    this.updatePhysics();
-    this.paint();
-    this.raf = requestAnimationFrame(this.loop);
-  }
-
-    init() {
-    this.img = new Image();
-    this.img.crossOrigin = "anonymous";
-    this.img.src = this.config.imageSrc;
-    
-    this.img.onload = () => {
-      if (!this.alive) return;
-      this.buildAscii();
-      this.paint();
-      this.raf = requestAnimationFrame(this.loop);
-    };
-    
-    window.addEventListener('resize', () => {
-      this.buildAscii();
-      this.paint();
-    });
-    
-    // Listen for mouse movement specifically over the hero container
-    const container = this.canvas.parentElement;
-    
-    container.addEventListener('mousemove', (e) => {
-      const rect = container.getBoundingClientRect();
-      this.pointer.x = e.clientX - rect.left;
-      this.pointer.y = e.clientY - rect.top;
-      this.pointer.inside = true;
-    });
-    
-    container.addEventListener('mouseout', (e) => {
-      // Only fade out if the mouse actually leaves the hero section
-      if (!container.contains(e.relatedTarget)) {
-        this.pointer.inside = false;
-        this.seeded = false;
-      }
-    });
-  }
-
-// Automatically start the effect when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-  const canvas = document.getElementById('ascii-bg');
-  if (canvas) {
-    new AsciiRevealBackground(canvas);
-  }
-});
