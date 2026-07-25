@@ -1,3 +1,4 @@
+```javascript
 // Mobile menu toggle
 const menuToggle = document.querySelector(".menu-toggle");
 const mobileMenu = document.getElementById("mobileMenu");
@@ -381,3 +382,38 @@ document.addEventListener('DOMContentLoaded', () => {
     new RevealBackground(canvas);
   }
 });
+
+/* ==========================================================
+   SCROLL SPY FOR NAVIGATION LINKS
+   ========================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.site-header__nav a, .mobile-menu a');
+
+  const observerOptions = {
+    root: null,
+    // Triggers when the section passes through the middle of the viewport
+    rootMargin: '-50% 0px -50% 0px', 
+    threshold: 0
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        
+        // Remove active class from all links
+        navLinks.forEach(link => link.classList.remove('active'));
+        
+        // Add active class to corresponding links
+        const activeLinks = document.querySelectorAll(`.site-header__nav a[href="#${id}"], .mobile-menu a[href="#${id}"]`);
+        activeLinks.forEach(link => link.classList.add('active'));
+      }
+    });
+  }, observerOptions);
+
+  sections.forEach(section => {
+    observer.observe(section);
+  });
+});
+```
