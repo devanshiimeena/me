@@ -339,7 +339,7 @@ class RevealBackground {
     
     this.config = {
       // Put your image link here! (It won't crash anymore)
-      imageSrc: config.imageSrc || "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/e4476503-c1e3-4358-3ff6-539deda1f800/w=800",
+      imageSrc: config.imageSrc || "https://kommodo.ai/i/lH7ayUYJcqGLHgXo48VM",
       revealSize: 120,
       revealSoftness: 24,
       blobCount: 5,
