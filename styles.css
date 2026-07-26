@@ -927,3 +927,25 @@ button:focus-visible {
   position: relative;
   background: transparent;
 }
+
+/* ==========================================================
+   CUSTOM CURSOR STYLES
+   ========================================================== */
+body, a, button {
+  cursor: none !important; /* Hides the boring default Windows/Mac mouse pointer */
+}
+
+.cursor-shadow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  background: white; 
+  mix-blend-mode: difference; /* This makes it dynamically invert colors! */
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate3d(calc(var(--cursor-x) - 50%), calc(var(--cursor-y) - 50%), 0);
+  transition: transform 0.05s linear; /* Makes it follow smoothly without lagging */
+}
