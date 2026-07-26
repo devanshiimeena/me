@@ -339,7 +339,7 @@ class RevealBackground {
     
     this.config = {
       // Put your image link here! (It won't crash anymore)
-      imageSrc: config.imageSrc || "https://kommodo.ai/i/lH7ayUYJcqGLHgXo48VM",
+      imageSrc: config.imageSrc || "https://res.cloudinary.com/olidj8ez/image/upload/a_-450/e_contrast:level_21;type_sigmoidal/e_saturation:9/e_brightness:1/e_vibrance:13/f_auto/q_auto/501B43C7-086D-4554-882B-2B042D3A450F_nglil9.jpg",
       revealSize: 120,
       revealSoftness: 24,
       blobCount: 5,
