@@ -247,7 +247,6 @@ magneticElements.forEach((item) => {
       const rotateY = sign * -42;
       const scale = isCurrent ? 1 : 1 - Math.min(distance, 3) * 0.08;
 
-            // We added translate(-50%, -50%) to perfectly lock the image in the dead-center vertically and horizontally!
       slide.style.transform = `translate(-50%, -50%) translateX(${x}px) rotateY(${rotateY}deg) scale(${scale})`;
       slide.style.opacity = visible ? "1" : "0";
       slide.style.zIndex = 10 - distance;
@@ -313,16 +312,15 @@ magneticElements.forEach((item) => {
   buildDots();
   render();
 })();
+
 /* ==========================================================
    GLOBAL CURSOR TRACKING
    ========================================================== */
 document.addEventListener('DOMContentLoaded', () => {
-    // Auto-inject the cursor so you don't have to edit all your HTML pages!
     const cursorShadow = document.createElement('div');
     cursorShadow.className = 'cursor-shadow';
     document.body.appendChild(cursorShadow);
 
-    // Update CSS variables on mouse move
     window.addEventListener('mousemove', (e) => {
         document.documentElement.style.setProperty('--cursor-x', `${e.clientX}px`);
         document.documentElement.style.setProperty('--cursor-y', `${e.clientY}px`);
@@ -330,193 +328,22 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ==========================================================
-   IMAGE REVEAL BACKGROUND (HERO ONLY)
+   PARALLAX ORBITING TAGS (NEW HERO)
    ========================================================== */
-class RevealBackground {
-  constructor(canvasElement, config = {}) {
-    this.canvas = canvasElement;
-    this.ctx = this.canvas.getContext('2d');
-    
-    this.config = {
-      // Put your image link here! (It won't crash anymore)
-      imageSrc: config.imageSrc || "https://res.cloudinary.com/olidj8ez/image/upload/a_-450/e_contrast:level_21;type_sigmoidal/e_saturation:9/e_brightness:1/e_vibrance:13/f_auto/q_auto/501B43C7-086D-4554-882B-2B042D3A450F_nglil9.jpg",
-      revealSize: 120,
-      revealSoftness: 24,
-      blobCount: 5,
-      ...config
-    };
-    
-    this.revealCanvas = document.createElement('canvas');
-    this.maskCanvas = document.createElement('canvas');
-    
-    this.pointer = { x: -9999, y: -9999, inside: false };
-    this.blobs = Array.from({ length: this.config.blobCount }, () => ({ x: 0, y: 0 }));
-    this.seeded = false;
-    
-    this.coverRect = { dx: 0, dy: 0, dw: 0, dh: 0 };
-    this.alive = true;
-    this.raf = null;
-    this.img = null;
-    this.revealOpacity = 0; 
-    
-    this.init();
-  }
-
-  getSize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const container = this.canvas.parentElement;
-    const w = container.clientWidth;
-    const h = container.clientHeight;
-    return { w, h, dpr };
-  }
-
-  placeRect(imgW, imgH, boxW, boxH) {
-    const scale = Math.max(boxW / imgW, boxH / imgH);
-    const dw = imgW * scale;
-    const dh = imgH * scale;
-    const dx = (boxW - dw) / 2;
-    const dy = (boxH - dh) * 0.5; 
-    return { dx, dy, dw, dh };
-  }
-
-  ensureLayer(layer) {
-    if (layer.width !== this.canvas.width || layer.height !== this.canvas.height) {
-      layer.width = this.canvas.width;
-      layer.height = this.canvas.height;
-    }
-  }
-
-  updatePhysics() {
-    if (this.blobs.length === 0) return;
-    const { dpr } = this.getSize();
-    
-    const tx = this.pointer.x * dpr;
-    const ty = this.pointer.y * dpr;
-    
-    if (!this.seeded && this.pointer.inside) {
-      for (const blob of this.blobs) {
-        blob.x = tx;
-        blob.y = ty;
-      }
-      this.seeded = true;
-    }
-    
-    if (this.seeded) {
-      this.blobs[0].x += (tx - this.blobs[0].x) * 0.35;
-      this.blobs[0].y += (ty - this.blobs[0].y) * 0.35;
-      
-      for (let i = 1; i < this.blobs.length; i++) {
-        this.blobs[i].x += (this.blobs[i-1].x - this.blobs[i].x) * 0.35;
-        this.blobs[i].y += (this.blobs[i-1].y - this.blobs[i].y) * 0.35;
-      }
-    }
-
-    if (this.pointer.inside) {
-      this.revealOpacity += (1 - this.revealOpacity) * 0.1;
-    } else {
-      this.revealOpacity += (0 - this.revealOpacity) * 0.05; 
-    }
-  }
-
-  resize() {
-    if (!this.img) return;
-    const { w, h, dpr } = this.getSize();
-    this.canvas.width = Math.max(1, Math.round(w * dpr));
-    this.canvas.height = Math.max(1, Math.round(h * dpr));
-    
-    this.coverRect = this.placeRect(
-      this.img.width, this.img.height,
-      this.canvas.width, this.canvas.height
-    );
-  }
-
-  paint() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    
-    if (!this.img || this.revealOpacity < 0.01) return;
-    
-    const { dpr } = this.getSize();
-    
-    this.ensureLayer(this.revealCanvas);
-    this.ensureLayer(this.maskCanvas);
-    
-    const pctx = this.revealCanvas.getContext('2d');
-    const mctx = this.maskCanvas.getContext('2d');
-    
-    pctx.globalCompositeOperation = "source-over";
-    pctx.clearRect(0, 0, this.revealCanvas.width, this.revealCanvas.height);
-    pctx.drawImage(this.img, this.coverRect.dx, this.coverRect.dy, this.coverRect.dw, this.coverRect.dh);
-    
-    mctx.clearRect(0, 0, this.maskCanvas.width, this.maskCanvas.height);
-    mctx.save();
-    mctx.filter = `blur(${(this.config.revealSoftness * dpr).toFixed(1)}px)`;
-    mctx.fillStyle = "#FFFFFF";
-    
-    for (let i = 0; i < this.blobs.length; i++) {
-      const t = this.blobs.length <= 1 ? 0 : i / (this.blobs.length - 1);
-      const radius = this.config.revealSize * dpr * (1 - t * 0.5);
-      mctx.beginPath();
-      mctx.arc(this.blobs[i].x, this.blobs[i].y, radius, 0, Math.PI * 2);
-      mctx.fill();
-    }
-    mctx.restore();
-    
-    pctx.globalCompositeOperation = "destination-in";
-    pctx.drawImage(this.maskCanvas, 0, 0);
-    
-    this.ctx.globalAlpha = this.revealOpacity;
-    this.ctx.globalCompositeOperation = "source-over";
-    this.ctx.drawImage(this.revealCanvas, 0, 0);
-    this.ctx.globalAlpha = 1.0;
-  }
-
-  loop = () => {
-    if (!this.alive) return;
-    this.updatePhysics();
-    this.paint();
-    this.raf = requestAnimationFrame(this.loop);
-  }
-
-  init() {
-    this.img = new Image();
-    this.img.src = this.config.imageSrc; // No crossOrigin blocks anymore!
-    
-    this.img.onload = () => {
-      if (!this.alive) return;
-      this.resize();
-      this.paint();
-      this.raf = requestAnimationFrame(this.loop);
-    };
-    
-    window.addEventListener('resize', () => {
-      this.resize();
-      this.paint();
-    });
-    
-    const container = this.canvas.parentElement;
-    
-    container.addEventListener('mousemove', (e) => {
-      const rect = container.getBoundingClientRect();
-      this.pointer.x = e.clientX - rect.left;
-      this.pointer.y = e.clientY - rect.top;
-      this.pointer.inside = true;
-    });
-    
-    container.addEventListener('mouseout', (e) => {
-      if (!container.contains(e.relatedTarget)) {
-        this.pointer.inside = false;
-        this.seeded = false;
-      }
-    });
-  }
-}
-
-// Automatically start the effect when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-  const canvas = document.getElementById('ascii-bg');
-  if (canvas) {
-    new RevealBackground(canvas);
-  }
+    const tags = document.querySelectorAll('.tag');
+    
+    // We attach the mousemove listener to the entire document/window 
+    // so the tags track perfectly wherever your mouse goes on the hero background!
+    document.addEventListener('mousemove', (e) => {
+        const xAxis = (window.innerWidth / 2 - e.clientX) / 50;
+        const yAxis = (window.innerHeight / 2 - e.clientY) / 50;
+        
+        tags.forEach((tag, index) => {
+            const speed = (index + 1) * 0.4;
+            tag.style.transform = `translate(${xAxis * speed}px, ${yAxis * speed}px)`;
+        });
+    });
 });
 
 /* ==========================================================
@@ -528,7 +355,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const observerOptions = {
     root: null,
-    // Triggers when the section passes through the middle of the viewport
     rootMargin: '-50% 0px -50% 0px', 
     threshold: 0
   };
@@ -538,10 +364,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (entry.isIntersecting) {
         const id = entry.target.getAttribute('id');
         
-        // Remove active class from all links
         navLinks.forEach(link => link.classList.remove('active'));
         
-        // Add active class to corresponding links
         const activeLinks = document.querySelectorAll(`.site-header__nav a[href="#${id}"], .mobile-menu a[href="#${id}"]`);
         activeLinks.forEach(link => link.classList.add('active'));
       }
@@ -552,3 +376,4 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(section);
   });
 });
+
