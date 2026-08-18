@@ -164,34 +164,87 @@ a {
 }
 
 /* ==========================================================
-   HERO
+   HERO (FULL SCREEN WITH BACKGROUND & ORBITING TAGS)
    ========================================================== */
+
+/* Wrap your Ticker + Header + Hero in this class in your index.html! */
+.main-container {
+  width: 100%;
+  position: relative;
+  /* We don't use height: 100vh or overflow: hidden so we don't break the rest of your site's scrolling! */
+  
+  /* Full screen background image */
+  background-image: url('bg.jpg'); /* Make sure your image goes here */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 .hero {
-  min-height: 88vh;
+  /* Set hero to fill the remaining screen height under the header */
+  min-height: calc(100vh - 80px); /* Adjust 80px based on your header height */
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
   padding: var(--edge);
   border-bottom: 3px solid var(--black);
   position: relative;
 }
 
-.hero__headline {
-  font-size: clamp(80px, 22vw, 320px);
+/* Split Headline around the head */
+.split-headline {
+  position: absolute;
+  font-size: clamp(60px, 12vw, 200px);
   line-height: 0.82;
   font-weight: bold;
   letter-spacing: -0.03em;
   text-transform: uppercase;
+  color: var(--black);
+  z-index: 5;
 }
 
-.hero__sub {
-  margin-top: clamp(16px, 3vw, 28px);
-  font-size: clamp(14px, 1.6vw, 20px);
-  font-weight: bold;
-  text-transform: lowercase;
+.split-left {
+  left: 5%;
+  top: 35%; /* Aligned roughly with head vertically */
 }
 
+.split-right {
+  right: 2%; /* Moved slightly further right to avoid chest */
+  top: 35%; 
+  color: var(--pink);
+}
+
+/* Floating Tags */
+.tag {
+  position: absolute;
+  font-family: var(--font);
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  color: var(--pink); 
+  z-index: 10;
+  transition: transform 0.2s ease-out;
+  padding: 0.5rem;
+  justify-content: center;
+}
+
+.tag span {
+  font-size: 1rem;
+  display: block;
+  color: var(--pink); 
+}
+
+/* Position tags around sofa and table avoiding the center girl */
+.tag-1 { top: 15%; left: 15%; } 
+.tag-2 { bottom: 25%; left: 10%; } 
+.tag-3 { top: 20%; right: 25%; } 
+.tag-4 { top: 55%; right: 15%; } 
+.tag-5 { bottom: 20%; right: 30%; } 
+
+/* The scrolling prompt button in the corner */
 .hero__scroll {
   position: absolute;
   bottom: var(--edge);
@@ -203,6 +256,7 @@ a {
   border: 2px solid var(--black);
   padding: 10px 16px;
   transition: background 0.15s ease, color 0.15s ease;
+  z-index: 10;
 }
 
 .hero__scroll:hover {
@@ -333,7 +387,7 @@ a {
   margin-top: 10px;
   line-height: 1.4;
   opacity: 0.85;
-  text-transform: none; /* keep normal casing for readability */
+  text-transform: none;
 }
 
 .work__meta {
@@ -631,27 +685,27 @@ a {
   overflow: hidden;
   position: relative;
   width: 100vw;
-  margin-left: calc(-50vw + 50%); /* Forces the container to stretch edge-to-edge */
+  margin-left: calc(-50vw + 50%);
   margin-right: calc(-50vw + 50%);
 }
 
 .carousel-track {
   display: flex;
-  gap: clamp(30px, 5vw, 60px); /* Spacing between images */
+  gap: clamp(30px, 5vw, 60px);
   width: max-content;
   align-items: center;
   padding: 40px 0;
-  will-change: transform; /* Performance optimization */
+  will-change: transform;
 }
 
 .carousel-item {
   width: clamp(220px, 25vw, 400px);
-  aspect-ratio: 3/4; /* Keeps images beautifully tall */
+  aspect-ratio: 3/4;
   flex-shrink: 0;
   will-change: transform, opacity;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Adds depth like the React component */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
 .carousel-item img {
@@ -666,39 +720,6 @@ a {
 .carousel-item:hover img {
   filter: grayscale(0%);
 }
-/* ==========================================================
-   RESPONSIVE
-   ========================================================== */
-@media (max-width: 720px) {
-  .site-header__nav {
-    display: none;
-  }
-  .menu-toggle {
-    display: inline-block;
-  }
-  .work__grid {
-    grid-template-columns: 1fr;
-  }
-  .manifesto__text--right {
-    text-align: left;
-    margin-left: 0;
-  }
-  .hero__scroll {
-    position: static;
-    margin-top: 40px;
-    display: inline-block;
-  }
-  .hero {
-    align-items: flex-start;
-  }
-}
-
-/* Keyboard focus visibility */
-a:focus-visible,
-button:focus-visible {
-  outline: 3px solid var(--black);
-  outline-offset: 3px;
-}
 
 /* ==========================================================
    CODEPEN GALLERY ADAPTED (NO ROUND EDGES)
@@ -706,15 +727,10 @@ button:focus-visible {
 .gallery-section {
   background: var(--pink);
   color: var(--black);
-  
   padding-top: clamp(60px, 10vw, 120px);
-  /* Added extra padding on the bottom to perfectly offset the header at the top! */
   padding-bottom: calc(clamp(60px, 10vw, 120px) + 3.5rem);
-  
-  /* Added a matching black line to the top! */
   border-top: 3px solid var(--black);
   border-bottom: 3px solid var(--black);
-  
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -749,7 +765,6 @@ button:focus-visible {
 
 .stage {
   position: relative;
-  /* Increased height so the taller photos don't get cut off */
   height: clamp(450px, 60vw, 700px); 
   width: 100%;
   perspective: 1200px;
@@ -763,21 +778,13 @@ button:focus-visible {
 .slide {
   margin: 0;
   position: absolute;
-  top: 50%; /* Switched from top: 0 to top: 50% to push it to the middle! */
+  top: 50%;
   left: 50%;
   width: 400px; 
-  /* Removed margin-left entirely because JavaScript will perfectly center it now */
   cursor: pointer;
   transform-style: preserve-3d;
   transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@media (max-width: 720px) {
-  .slide { 
-    width: 260px; 
-    /* Removed margin-left here too */
-  }
 }
 
 .slide-frame {
@@ -786,7 +793,7 @@ button:focus-visible {
   background: var(--pink);
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
   overflow: hidden;
-  border-radius: 0; /* No round edges */
+  border-radius: 0;
   box-shadow: 0 10px 20px rgba(0,0,0,0.15);
 }
 
@@ -841,7 +848,7 @@ button:focus-visible {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 50; /* Keeps buttons clickable above the images */
+  z-index: 50;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -854,7 +861,7 @@ button:focus-visible {
 }
 
 .nav-btn:hover:not(:disabled) {
-  opacity: 0.5; /* Subtle fade on hover */
+  opacity: 0.5;
 }
 
 .nav-btn:disabled {
@@ -865,52 +872,13 @@ button:focus-visible {
 .prev-btn { left: 4vw; }
 .next-btn { right: 4vw; }
 
-@media (max-width: 720px) {
-  .nav-btn svg { width: 32px; height: 32px; }
-  .prev-btn { left: 1vw; }
-  .next-btn { right: 1vw; }
-}
-/* ==========================================================
-   ASCII REVEAL BACKGROUND (HERO ONLY)
-   ========================================================== */
-.hero {
-  position: relative;
-  overflow: hidden; /* This traps the canvas inside the hero section! */
-}
-
-#ascii-bg {
-  position: absolute; /* absolute, not fixed! */
-  top: 0;
-  left: 0;
-  width: 100%; /* 100%, not 100vw! */
-  height: 100%; /* 100%, not 100vh! */
-  z-index: 0; 
-  pointer-events: none;
-  background: var(--pink);
-}
-
-/* Ensure the text stays on top of the canvas */
-.hero__headline-container,
-.hero__headline,
-.hero__sub {
-  position: relative;
-  z-index: 1; 
-}
-
-/* Give the scroll button a z-index without breaking its absolute position */
-.hero__scroll {
-  z-index: 1; 
-}
-
 /* ==========================================================
    SCROLL SPY (ACTIVE LINK HIGHLIGHT)
    ========================================================== */
-/* Keep the underline permanently drawn for the active section */
 .site-header__nav a.active::after {
   width: 100%;
 }
 
-/* Optional: Highlight for the mobile menu */
 .mobile-menu a.active {
   background: var(--black);
   color: var(--pink);
@@ -947,8 +915,61 @@ body, a, button {
   pointer-events: none;
   z-index: 99999;
   transform: translate3d(calc(var(--cursor-x) - 50%), calc(var(--cursor-y) - 50%), 0);
-  
-  /* This blend mode makes it a dark shadow on the pink background, 
-     and a glowing pink aura on the black sections! */
   mix-blend-mode: difference;
+}
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+@media (max-width: 768px) {
+  .site-header__nav {
+    display: none;
+  }
+  .menu-toggle {
+    display: inline-block;
+  }
+  .work__grid {
+    grid-template-columns: 1fr;
+  }
+  .manifesto__text--right {
+    text-align: left;
+    margin-left: 0;
+  }
+  .hero__scroll {
+    position: static;
+    margin-top: 40px;
+    display: inline-block;
+  }
+  
+  .slide { 
+    width: 260px; 
+  }
+  .nav-btn svg { width: 32px; height: 32px; }
+  .prev-btn { left: 1vw; }
+  .next-btn { right: 1vw; }
+  
+  /* Responsive text scaling for hero */
+  .split-headline {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    font-size: clamp(40px, 15vw, 100px);
+    text-align: center;
+    width: 100%;
+    margin-top: 10%;
+  }
+  
+  .tag-1 { top: 10%; left: 10%; }
+  .tag-2 { bottom: 20%; left: 10%; }
+  .tag-3 { top: 15%; right: 10%; }
+  .tag-4 { top: 40%; right: 10%; }
+  .tag-5 { bottom: 15%; right: 10%; }
+}
+
+/* Keyboard focus visibility */
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--black);
+  outline-offset: 3px;
 }
