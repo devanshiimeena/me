@@ -247,6 +247,7 @@ magneticElements.forEach((item) => {
       const rotateY = sign * -42;
       const scale = isCurrent ? 1 : 1 - Math.min(distance, 3) * 0.08;
 
+            // We added translate(-50%, -50%) to perfectly lock the image in the dead-center vertically and horizontally!
       slide.style.transform = `translate(-50%, -50%) translateX(${x}px) rotateY(${rotateY}deg) scale(${scale})`;
       slide.style.opacity = visible ? "1" : "0";
       slide.style.zIndex = 10 - distance;
@@ -312,15 +313,16 @@ magneticElements.forEach((item) => {
   buildDots();
   render();
 })();
-
 /* ==========================================================
    GLOBAL CURSOR TRACKING
    ========================================================== */
 document.addEventListener('DOMContentLoaded', () => {
+    // Auto-inject the cursor so you don't have to edit all your HTML pages!
     const cursorShadow = document.createElement('div');
     cursorShadow.className = 'cursor-shadow';
     document.body.appendChild(cursorShadow);
 
+    // Update CSS variables on mouse move
     window.addEventListener('mousemove', (e) => {
         document.documentElement.style.setProperty('--cursor-x', `${e.clientX}px`);
         document.documentElement.style.setProperty('--cursor-y', `${e.clientY}px`);
@@ -345,20 +347,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
-
 /* ==========================================================
    SCROLL SPY FOR NAVIGATION LINKS
    ========================================================== */
 document.addEventListener('DOMContentLoaded', () => {
   const sections = document.querySelectorAll('section[id]');
   const navLinks = document.querySelectorAll('.site-header__nav a, .mobile-menu a');
-
   const observerOptions = {
     root: null,
     rootMargin: '-50% 0px -50% 0px', 
     threshold: 0
   };
-
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -371,9 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }, observerOptions);
-
   sections.forEach(section => {
     observer.observe(section);
   });
 });
-
