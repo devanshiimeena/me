@@ -211,6 +211,98 @@ a {
 }
 
 /* ==========================================================
+   HERO (FULL SCREEN WITH BACKGROUND & ORBITING TAGS)
+   ========================================================== */
+/* Wrap your Ticker + Header + Hero in this class in your index.html! */
+.main-container {
+  width: 100%;
+  position: relative;
+  /* We don't use height: 100vh or overflow: hidden so we don't break the rest of your site's scrolling! */
+  
+  /* Full screen background image */
+  background-image: url('bg.jpg'); /* Make sure your image goes here */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.hero {
+  /* Set hero to fill the remaining screen height under the header */
+  min-height: calc(100vh - 80px); /* Adjust 80px based on your header height */
+  display: flex;
+  flex-direction: column;
+  padding: var(--edge);
+  border-bottom: 3px solid var(--black);
+  position: relative;
+}
+/* Split Headline around the head */
+.split-headline {
+  position: absolute;
+  font-size: clamp(60px, 12vw, 200px);
+  line-height: 0.82;
+  font-weight: bold;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: var(--black);
+  z-index: 5;
+}
+.split-left {
+  left: 5%;
+  top: 35%; /* Aligned roughly with head vertically */
+}
+.split-right {
+  right: 2%; /* Moved slightly further right to avoid chest */
+  top: 35%; 
+  color: var(--pink);
+}
+/* Floating Tags */
+.tag {
+  position: absolute;
+  font-family: var(--font);
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  color: var(--pink); 
+  z-index: 10;
+  transition: transform 0.2s ease-out;
+  padding: 0.5rem;
+  justify-content: center;
+}
+.tag span {
+  font-size: 1rem;
+  display: block;
+  color: var(--pink); 
+}
+/* Position tags around sofa and table avoiding the center girl */
+.tag-1 { top: 15%; left: 15%; } 
+.tag-2 { bottom: 25%; left: 10%; } 
+.tag-3 { top: 20%; right: 25%; } 
+.tag-4 { top: 55%; right: 15%; } 
+.tag-5 { bottom: 20%; right: 30%; } 
+/* The scrolling prompt button in the corner */
+.hero__scroll {
+  position: absolute;
+  bottom: var(--edge);
+  right: var(--edge);
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 2px solid var(--black);
+  padding: 10px 16px;
+  transition: background 0.15s ease, color 0.15s ease;
+  z-index: 10;
+}
+.hero__scroll:hover {
+  background: var(--black);
+  color: var(--pink);
+}
+
+
+/* ==========================================================
    STATEMENT STRIP
    ========================================================== */
 .strip {
@@ -669,7 +761,7 @@ a {
 /* ==========================================================
    RESPONSIVE
    ========================================================== */
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .site-header__nav {
     display: none;
   }
@@ -688,11 +780,32 @@ a {
     margin-top: 40px;
     display: inline-block;
   }
-  .hero {
-    align-items: flex-start;
+  
+  .slide { 
+    width: 260px; 
   }
+  .nav-btn svg { width: 32px; height: 32px; }
+  .prev-btn { left: 1vw; }
+  .next-btn { right: 1vw; }
+  
+  /* Responsive text scaling for hero */
+  .split-headline {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    font-size: clamp(40px, 15vw, 100px);
+    text-align: center;
+    width: 100%;
+    margin-top: 10%;
+  }
+  
+  .tag-1 { top: 10%; left: 10%; }
+  .tag-2 { bottom: 20%; left: 10%; }
+  .tag-3 { top: 15%; right: 10%; }
+  .tag-4 { top: 40%; right: 10%; }
+  .tag-5 { bottom: 15%; right: 10%; }
 }
-
 /* Keyboard focus visibility */
 a:focus-visible,
 button:focus-visible {
