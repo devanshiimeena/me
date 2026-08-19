@@ -228,7 +228,7 @@ a {
 /* ==========================================================
    TOP HERO BACKGROUND IMAGE (ONLY ON INDEX)
    ========================================================== */
-#top .hero {
+#top > .hero {
   background-image: url('https://res.cloudinary.com/olidj8ez/image/upload/v1787126714/copy_of_29e954f2-f7ce-4f40-8bcf-2a8f626d87f6_p0tp9x.jpg');
   background-size: cover;
   background-position: center;
