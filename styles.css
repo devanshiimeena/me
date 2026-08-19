@@ -219,12 +219,16 @@ a {
   position: relative;
   /* We don't use height: 100vh or overflow: hidden so we don't break the rest of your site's scrolling! */
   
-  /* Full screen background image */
-  background-image: url('bg.jpg'); /* Make sure your image goes here */
+  .hero {
+  background-image: url('https://res.cloudinary.com/olidj8ez/image/upload/a_-450/e_contrast:level_21;type_sigmoidal/e_saturation:9/e_brightness:1/e_vibrance:13/f_auto/q_auto/501B43C7-086D-4554-882B-2B042D3A450F_nglil9.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  
+  /* You might also want to darken it slightly so the white text is readable */
+  box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.3); 
 }
+
 .hero {
   /* Set hero to fill the remaining screen height under the header */
   min-height: calc(100vh - 80px); /* Adjust 80px based on your header height */
