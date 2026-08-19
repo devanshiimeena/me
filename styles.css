@@ -211,8 +211,8 @@ a {
 }
 
 
-  /* ==========================================================
-   HERO (FULL SCREEN WITH BACKGROUND & ORBITING TAGS)
+/* ==========================================================
+   HERO (GENERAL STYLES FOR ALL SECTIONS)
    ========================================================== */
 .hero {
   /* Set hero to fill the remaining screen height under the header */
@@ -223,13 +223,18 @@ a {
   border-bottom: 3px solid var(--black);
   position: relative;
   overflow: hidden;
-  
-  /* Your Background Image */
+}
+
+/* ==========================================================
+   TOP HERO BACKGROUND IMAGE (ONLY ON INDEX)
+   ========================================================== */
+#top .hero {
   background-image: url('https://res.cloudinary.com/olidj8ez/image/upload/a_-450/e_contrast:level_21;type_sigmoidal/e_saturation:9/e_brightness:1/e_vibrance:13/f_auto/q_auto/501B43C7-086D-4554-882B-2B042D3A450F_nglil9.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
+
 
 /* Split Headline around the head */
 .split-headline {
