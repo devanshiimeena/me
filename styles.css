@@ -210,34 +210,27 @@ a {
   color: var(--pink);
 }
 
-/* ==========================================================
+
+  /* ==========================================================
    HERO (FULL SCREEN WITH BACKGROUND & ORBITING TAGS)
    ========================================================== */
-/* Wrap your Ticker + Header + Hero in this class in your index.html! */
-.main-container {
-  width: 100%;
-  position: relative;
-  /* We don't use height: 100vh or overflow: hidden so we don't break the rest of your site's scrolling! */
-  
-  .hero {
-  background-image: url('https://res.cloudinary.com/olidj8ez/image/upload/a_-450/e_contrast:level_21;type_sigmoidal/e_saturation:9/e_brightness:1/e_vibrance:13/f_auto/q_auto/501B43C7-086D-4554-882B-2B042D3A450F_nglil9.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  
-  /* You might also want to darken it slightly so the white text is readable */
-  box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.3); 
-}
-
 .hero {
   /* Set hero to fill the remaining screen height under the header */
-  min-height: calc(100vh - 80px); /* Adjust 80px based on your header height */
+  min-height: calc(100vh - 80px); 
   display: flex;
   flex-direction: column;
   padding: var(--edge);
   border-bottom: 3px solid var(--black);
   position: relative;
+  overflow: hidden;
+  
+  /* Your Background Image */
+  background-image: url('https://res.cloudinary.com/olidj8ez/image/upload/a_-450/e_contrast:level_21;type_sigmoidal/e_saturation:9/e_brightness:1/e_vibrance:13/f_auto/q_auto/501B43C7-086D-4554-882B-2B042D3A450F_nglil9.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
+
 /* Split Headline around the head */
 .split-headline {
   position: absolute;
@@ -246,18 +239,21 @@ a {
   font-weight: bold;
   letter-spacing: -0.03em;
   text-transform: uppercase;
-  color: var(--black);
   z-index: 5;
 }
+
 .split-left {
   left: 5%;
-  top: 35%; /* Aligned roughly with head vertically */
+  top: 45%; 
+  color: var(--black);
 }
+
 .split-right {
-  right: 2%; /* Moved slightly further right to avoid chest */
-  top: 35%; 
-  color: var(--pink);
+  right: 5%;
+  top: 45%; 
+  color: var(--pink); /* Make "DEVANSHI" perfectly pink! */
 }
+
 /* Floating Tags */
 .tag {
   position: absolute;
@@ -271,39 +267,24 @@ a {
   gap: 0.2rem;
   color: var(--pink); 
   z-index: 10;
-  transition: transform 0.2s ease-out;
   padding: 0.5rem;
   justify-content: center;
+  text-align: center;
+  /* Make sure you DO NOT have a transition on transform here, so the javascript float works smoothly! */
 }
+
 .tag span {
   font-size: 1rem;
   display: block;
   color: var(--pink); 
 }
-/* Position tags around sofa and table avoiding the center girl */
-.tag-1 { top: 15%; left: 15%; } 
+
+/* Position tags around the photo */
+.tag-1 { top: 25%; left: 15%; } 
 .tag-2 { bottom: 25%; left: 10%; } 
-.tag-3 { top: 20%; right: 25%; } 
-.tag-4 { top: 55%; right: 15%; } 
-.tag-5 { bottom: 20%; right: 30%; } 
-/* The scrolling prompt button in the corner */
-.hero__scroll {
-  position: absolute;
-  bottom: var(--edge);
-  right: var(--edge);
-  font-size: 13px;
-  font-weight: bold;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border: 2px solid var(--black);
-  padding: 10px 16px;
-  transition: background 0.15s ease, color 0.15s ease;
-  z-index: 10;
-}
-.hero__scroll:hover {
-  background: var(--black);
-  color: var(--pink);
-}
+.tag-3 { top: 30%; right: 25%; } 
+.tag-4 { bottom: 35%; right: 15%; } 
+.tag-5 { bottom: 15%; right: 30%; } 
 
 
 /* ==========================================================
