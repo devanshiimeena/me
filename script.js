@@ -163,9 +163,9 @@ magneticElements.forEach((item) => {
   const nextBtn = document.getElementById("next-btn");
 
   const photos = [
-    { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/e60dd7f7-a44f-40a7-df62-095b19cd8700/w=800", title: "WORK 01", place: "BRANDING", no: "01" },
-    { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/eec164e9-23f8-4f87-b48a-a208fa806100/w=800", title: "WORK 02", place: "ILLUSTRATION", no: "02" },
-    { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/859c75ea-953e-489e-be61-91a03a35d700/w=800", title: "WORK 03", place: "DESIGN", no: "03" },
+    { src: "https://res.cloudinary.com/olidj8ez/image/upload/v1787217106/Untitled10_20260812163426_fz6lvn.png", title: "DOUBLE DECKER EYELASHES", place: "ILLUSTRATION / FOR CORNERSHOP", no: "01" },
+    { src: "https://res.cloudinary.com/olidj8ez/image/upload/v1787217046/Untitled14_20260814231524_kqq1jy.png", title: "SHADES OF COOL", place: "ILLUSTRATION / PERSONAL", no: "02" },
+    { src: "https://res.cloudinary.com/olidj8ez/image/upload/v1787217103/Untitled13_20260813150938_pmb6kn.png", title: "HOW TO DISAPPEAR", place: "ILLUSTRATION / DEL REY INSPIRED", no: "03" },
     { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/933a7615-f4b6-4eae-8ed1-705fa0e24400/w=800", title: "WORK 04", place: "UI/UX", no: "04" },
     { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/7d4d2641-d6a8-4fef-e85c-b12ed100d500/w=800", title: "WORK 05", place: "WEB", no: "05" },
     { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/ed7b1c40-3332-43d8-a9eb-4615ef341b00/w=800", title: "WORK 06", place: "PRINT", no: "06" },
