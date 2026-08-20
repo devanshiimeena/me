@@ -166,7 +166,7 @@ magneticElements.forEach((item) => {
     { src: "https://res.cloudinary.com/olidj8ez/image/upload/v1787217106/Untitled10_20260812163426_fz6lvn.png", title: "DOUBLE DECKER EYELASHES", place: "ILLUSTRATION / FOR CORNERSHOP", no: "01" },
     { src: "https://res.cloudinary.com/olidj8ez/image/upload/v1787217046/Untitled14_20260814231524_kqq1jy.png", title: "SHADES OF COOL", place: "ILLUSTRATION / PERSONAL", no: "02" },
     { src: "https://res.cloudinary.com/olidj8ez/image/upload/v1787217103/Untitled13_20260813150938_pmb6kn.png", title: "HOW TO DISAPPEAR", place: "ILLUSTRATION / DEL REY INSPIRED", no: "03" },
-    { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/933a7615-f4b6-4eae-8ed1-705fa0e24400/w=800", title: "WORK 04", place: "UI/UX", no: "04" },
+    { src: "https://res.cloudinary.com/olidj8ez/image/upload/v1787219697/A7EC699B-D6E8-49F1-B7FB-2F9040BB6470_e2jphr.jpg", title: "BRAND MASCOT", place: "ILLUSTRATION / FOR CYRAC0RE", no: "04" },
     { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/7d4d2641-d6a8-4fef-e85c-b12ed100d500/w=800", title: "WORK 05", place: "WEB", no: "05" },
     { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/ed7b1c40-3332-43d8-a9eb-4615ef341b00/w=800", title: "WORK 06", place: "PRINT", no: "06" },
     { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/31afae9c-5ba3-4ec3-2534-ed8198ed1100/w=800", title: "WORK 07", place: "3D", no: "07" },
